@@ -3,7 +3,7 @@
 ## Purpose
 
 The purpose of this template is to speed up the creation of new [Express](http://expressjs.com/) frontend
-applications within HMCTS and help keep the same development standards across multiple teams.
+applications within HMCTS and help keep the same development standards across multiple  teams.
 If you need to create a new application, you can simply use this one as a starting point and build on top of it.
 
 ## What's inside
