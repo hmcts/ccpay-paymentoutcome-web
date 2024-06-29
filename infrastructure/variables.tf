@@ -30,7 +30,7 @@ variable "env" {
 }
 
 variable "subscription" {
-  type    = string
+  type = string
 }
 
 variable "common_tags" {
