@@ -132,7 +132,7 @@
     "semver": "7.6.3",
     "ajv": "6.12.6",
     "http-cache-semantics": "4.1.1",
-    "ip": "^2.0.1",
+    "socks": "^2.8.3",
     "body-parser": "^1.20.3",
     "serve-static": "^1.16.2",
     "path-to-regexp": "^0.1.0",
