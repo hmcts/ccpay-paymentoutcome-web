@@ -139,5 +139,5 @@
     "cross-spawn": "7.0.6",
     "cookie": "^0.7.0"
   },
-  "packageManager": "yarn@3.6.1"
+  "packageManager": "yarn@4.6.0"
 }
