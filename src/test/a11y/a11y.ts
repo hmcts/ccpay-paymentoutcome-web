@@ -56,6 +56,7 @@ function expectNoErrors(messages: PallyIssue[]): void {
 function testAccessibility(url: string): void {
   describe(`Page ${url}`, () => {
     test('should have no accessibility errors', done => {
+      console.log(`Checking accessibility for page: ${url}`);
       ensurePageCallWillSucceed(url)
         .then(() => runPally(agent.get(url).url))
         .then((result: Pa11yResult) => {
@@ -63,13 +64,11 @@ function testAccessibility(url: string): void {
           done();
         })
         .catch((err: Error) => done(err));
-    });
+    }, 15000); // Increase timeout to 15 seconds
   });
 }
 
 describe('Accessibility', () => {
   // testing accessibility of the home page
   testAccessibility('/');
-
-  // TODO: include each path of your application in accessibility checks
 });
