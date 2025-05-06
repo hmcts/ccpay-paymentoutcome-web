@@ -4,17 +4,12 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es5",
+    "target": "es6",
     "noImplicitAny": true,
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
-    "lib": [
-      "es6",
-      "es2017.object",
-      "dom"
-    ],
     "baseUrl": "src/main",
     "paths": {
       "app/*": [

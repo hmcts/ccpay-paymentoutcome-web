@@ -16,9 +16,7 @@ export function resolveCreateToken () {
   mock(`${s2sUrl}`)
     .persist()
     .post(/.*/)
-    .reply(HttpStatus.OK, {
-      token: 'token'
-    })
+    .reply(HttpStatus.OK, 'token');
 }
 
 export function resolveGetPaymentStatus (id: any) {

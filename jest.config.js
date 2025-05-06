@@ -1,5 +1,5 @@
 module.exports = {
-  roots: ['<rootDir>/src/test/unit'],
+  roots: ['<rootDir>/src/test/unit', '<rootDir>/src/test/app'],
   "testRegex": "(/src/test/.*|\\.(test|spec))\\.(ts|js)$",
    "moduleFileExtensions": [
     "ts",
