@@ -7259,7 +7259,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"formidable@npm:^3.2.4":
+"formidable@npm:^3.5.3":
   version: 3.5.2
   resolution: "formidable@npm:3.5.2"
   dependencies:
