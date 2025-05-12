@@ -1,3 +1,10 @@
+import { TextEncoder, TextDecoder } from 'util';
+if (typeof global.TextEncoder === 'undefined') {
+  global.TextEncoder = TextEncoder;
+}
+if (typeof global.TextDecoder === 'undefined') {
+  global.TextDecoder = TextDecoder;
+}
 import { expect } from 'chai';
 import request from 'supertest';
 import * as mock from 'nock'

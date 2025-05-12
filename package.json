@@ -116,7 +116,7 @@
     "braces": "^3.0.3",
     "chokidar": "^3.6.0",
     "micromatch": "^4.0.7",
-    "formidable": "^3.5.3",
+    "formidable": "^3.5.4",
     "lodash": "^4.17.21",
     "glob-parent": "^6.0.1",
     "json-schema": "^0.4.0",
