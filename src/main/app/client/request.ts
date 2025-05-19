@@ -12,11 +12,18 @@ const timeout: number = developmentMode ? 10000 : 4500
 
 const fetchWithTimeout = async (url: string, options: RequestInit = {}) => {
   const controller = new AbortController();
+  const signal = controller.signal;
   const id = setTimeout(() => controller.abort(), timeout);
 
   try {
-    return await fetch(url, options);
-  } finally {
+    return await fetch(url, {...options, signal});
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request to ${url} timed out after ${timeout}ms`);
+    }
+    throw error;
+  }
+  finally {
     clearTimeout(id);
   }
 
