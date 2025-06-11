@@ -1,45 +1,7 @@
-const httpCallMethods = ['get', 'post', 'put', 'patch', 'delete', 'del', 'head']
+const httpCallMethods = ['get', 'post', 'put', 'patch', 'delete', 'del', 'head'];
 
-export class RequestLoggingHandler {
-  constructor (public request: any, public apiLogger: any) {
-    this.request = request
-    this.apiLogger = apiLogger
-  }
-
-  get (target: any, key: any) {
-    if (contains(httpCallMethods, key)) {
-      const originalMethod = target[key]
-      return (...args: any[]) => {
-        this.handleLogging(key.toUpperCase(), asOptions(args[0]))
-        return originalMethod.apply(this.request, args)
-      }
-    } else {
-      return target[key]
-    }
-  }
-
-  handleLogging (method: any, options: any) {
-    this.apiLogger.logRequest({
-      method: method,
-      uri: options.uri,
-      requestBody: options.body,
-      query: options.qs
-    })
-    let originalCallback = intercept(options.callback)
-    options.callback = (err: any, response: any, body: any) => {
-      originalCallback(err, response, body)
-      this.apiLogger.logResponse({
-        uri: options.uri,
-        responseCode: ((response) ? response.statusCode : undefined),
-        responseBody: body,
-        error: err
-      })
-    }
-  }
-}
-
-function contains (array: any, value: any) {
-  return array.indexOf(value) >= 0
+function contains (array: any, value: any): boolean {
+  return array.indexOf(value) >= 0;
 }
 
 /**
@@ -49,17 +11,51 @@ function contains (array: any, value: any) {
 function asOptions (param: any) {
   if (typeof param === 'string' || param instanceof String) {
     return {
-      uri: param
-    }
+      uri: param,
+    };
   } else {
-    return param
+    return param;
   }
 }
 
 function intercept (callbackFunction: any) {
   return (err: any, response: any, body: any) => {
     if (callbackFunction) {
-      callbackFunction(err, response, body)
+      callbackFunction(err, response, body);
     }
+  };
+}
+
+
+export class RequestLoggingHandler {
+  constructor (public apiLogger: any) {
+    this.apiLogger = apiLogger;
+  }
+
+  apply (target: any, thisArg: any, argumentsList: any) {
+    const calledMethodName = target.name;
+    if (contains(httpCallMethods, calledMethodName)) {
+      this.handleLogging(calledMethodName.toUpperCase(), asOptions(argumentsList[0]));
+    }
+    return Reflect.apply(target, thisArg, argumentsList);
+  }
+
+  handleLogging (method: any, options: any) {
+    this.apiLogger.logRequest({
+      method: method,
+      uri: options.uri,
+      requestBody: options.body,
+      query: options.qs,
+    });
+    const originalCallback = intercept(options.callback);
+    options.callback = (err: any, response: any, body: any) => {
+      originalCallback(err, response, body);
+      this.apiLogger.logResponse({
+        uri: options.uri,
+        responseCode: ((response) ? response.statusCode : undefined),
+        responseBody: body,
+        error: err,
+      });
+    };
   }
 }

@@ -1,4 +1,4 @@
-import request from '../../app/client/request';
+import wrappedFetch from '../../app/client/request';
 const config = require('config');
 const otp = require('otp');
 const s2sUrl =  config.get('s2s.url');
@@ -7,27 +7,40 @@ const paymentoutcomeSecret = config.get('secrets.ccpay.paymentoutcome-s2s-web');
 const microService = config.get('security.clientId');
 
 export class PayhubService {
-  static getPaymentStatus (uuid: string): Promise<boolean> {
-    return this.createAuthToken().then((token: string)=> request.get({
-      uri: `${payhubUrl}/card-payments/${uuid}/status`,
-      json: true,
+  static async getPaymentStatus (uuid: string): Promise<boolean> {
+    const token = await this.createAuthToken();
+    const response = await wrappedFetch(`${payhubUrl}/card-payments/${uuid}/status`, {
+      method: 'GET',
       headers: {
         ServiceAuthorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-    })
-    .then((res: any) => res));
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch payment status: ${response.statusText}`);
+    }
+    return response.json();
   }
-  static createAuthToken() {
+
+  static async createAuthToken(): Promise<string> {
     const otpPassword = otp({ secret: paymentoutcomeSecret }).totp();
     const serviceAuthRequest = {
       microservice: microService,
-      oneTimePassword: otpPassword
+      oneTimePassword: otpPassword,
     };
-    return request.post({
-      uri: `${s2sUrl}/lease`,
-      body: serviceAuthRequest,
-      json: true
+    const response = await wrappedFetch(`${s2sUrl}/lease`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(serviceAuthRequest),
     });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get auth token: ${response.statusText}`);
+    }
+    // s2s auth returns plain text response
+    return await response.text();
   }
 }

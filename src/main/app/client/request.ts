@@ -1,7 +1,6 @@
 import { RequestLoggingHandler } from '../logging/requestPromiseLoggingHandler'
 import { ApiLogger } from '../logging/apiLogger'
-import * as requestPromise from 'request-promise-native'
-import * as request from 'request'
+const fetch = require('node-fetch')
 
 const logger = new ApiLogger()
 
@@ -10,14 +9,27 @@ const developmentMode = (process.env.NODE_ENV || localDevEnvironment) === localD
 
 const timeout: number = developmentMode ? 10000 : 4500
 
-const wrappedRequestPromise = requestPromise
-  .defaults({
-    json: true,
-    timeout: timeout
-  })
 
-export default new Proxy(wrappedRequestPromise, new RequestLoggingHandler(wrappedRequestPromise, logger))
+const fetchWithTimeout = async (url: string, options: RequestInit = {}) => {
+  const controller = new AbortController();
+  const signal = controller.signal;
+  const id = setTimeout(() => controller.abort(), timeout);
 
-const requestNonPromise = new Proxy(request, new RequestLoggingHandler(request, logger))
+  try {
+    return await fetch(url, {...options, signal});
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request to ${url} timed out after ${timeout}ms`);
+    }
+    throw error;
+  }
+  finally {
+    clearTimeout(id);
+  }
 
-export { requestNonPromise }
+};
+
+// Proxy to wrap fetch with logging
+const wrappedFetch = new Proxy(fetchWithTimeout, new RequestLoggingHandler(logger));
+
+export default wrappedFetch;
