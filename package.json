@@ -137,7 +137,8 @@
     "serve-static": "^1.16.2",
     "path-to-regexp": "~1.9.0",
     "cross-spawn": "7.0.6",
-    "cookie": "^0.7.0"
+    "cookie": "^0.7.0",
+    "brace-expansion": "1.1.11"
   },
   "packageManager": "yarn@3.6.1"
 }
