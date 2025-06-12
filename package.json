@@ -138,7 +138,7 @@
     "path-to-regexp": "~1.9.0",
     "cross-spawn": "7.0.6",
     "cookie": "^0.7.0",
-    "brace-expansion": "1.1.11"
+    "brace-expansion": "1.1.12"
   },
   "packageManager": "yarn@3.6.1"
 }
