@@ -140,5 +140,5 @@
     "cookie": "^0.7.0",
     "brace-expansion": "1.1.12"
   },
-  "packageManager": "yarn@3.6.1"
+  "packageManager": "yarn@3.8.7"
 }
