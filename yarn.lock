@@ -2668,12 +2668,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.9":
-  version: 18.19.123
-  resolution: "@types/node@npm:18.19.123"
+"@types/node@npm:^22.0.0":
+  version: 22.17.2
+  resolution: "@types/node@npm:22.17.2"
   dependencies:
-    undici-types: ~5.26.4
-  checksum: a450556143df831703fc20a96a1eff485fa425e5a6e887331991d3e00ab2d33981d36e94d4320f4961e96d22c488ced740913fed6de161daea5caf39722c5f49
+    undici-types: ~6.21.0
+  checksum: 2a82f96abcf25104efa6e9b8231616e039e5e0854f07e9ce4fdf821d30eaac30a80ec3cafefb36d2af8bd7c9594cfda337887bd85bb5c2031ba0f7e23a3d588d
   languageName: node
   linkType: hard
 
@@ -4550,7 +4550,7 @@ __metadata:
     "@types/jest": ^29.0.5
     "@types/lodash": ^4.14.165
     "@types/mini-css-extract-plugin": ^0.9.1
-    "@types/node": ^18.11.9
+    "@types/node": ^22.0.0
     "@types/node-fetch": ^2.6.12
     "@types/nunjucks": ^3.2.2
     "@types/require-directory": ^2.1.1
@@ -13408,10 +13408,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~5.26.4":
-  version: 5.26.5
-  resolution: "undici-types@npm:5.26.5"
-  checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 46331c7d6016bf85b3e8f20c159d62f5ae471aba1eb3dc52fff35a0259d58dcc7d592d4cc4f00c5f9243fa738a11cfa48bd20203040d4a9e6bc25e807fab7ab3
   languageName: node
   linkType: hard
 
