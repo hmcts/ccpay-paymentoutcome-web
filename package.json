@@ -129,7 +129,7 @@
     "tar": "6.2.1",
     "ansi-regex": "5.0.1",
     "json5": "1.0.2",
-    "semver": "7.7.2",
+    "semver": "7.7.3",
     "ajv": "6.12.6",
     "http-cache-semantics": "4.2.0",
     "socks": "^2.8.3",
