@@ -55,7 +55,7 @@
     "helmet": "^4.2.0",
     "http-status-codes": "^1.1.6",
     "jquery": "^3.5.1",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.23",
     "nock": "^13.0.5",
     "node-fetch": "^2.7.0",
     "nunjucks": "^3.2.4",
