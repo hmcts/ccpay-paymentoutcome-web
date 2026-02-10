@@ -11989,8 +11989,8 @@ __metadata:
   linkType: hard
 
 "sass-loader@npm:^10.4.1":
-  version: 10.5.0
-  resolution: "sass-loader@npm:10.5.0"
+  version: 10.5.2
+  resolution: "sass-loader@npm:10.5.2"
   dependencies:
     klona: ^2.0.4
     loader-utils: ^2.0.0
@@ -12009,7 +12009,7 @@ __metadata:
       optional: true
     sass:
       optional: true
-  checksum: 4cf460d1b01898c1a0bd79ec8157fd51e467cdb6513839950422b26acbaf4bfd2ec7be354a45a9cc1e8e684daa50d4100b7daf0e0b43baf5d85ea78bbfa734b7
+  checksum: 416909a9d685aafeb4342d91575439b293f4e1d6fdf7f8f970e4b3158af38e3e7379b87c0a82d7b7b32165b1f54bcd7eca3c132ad143405a5105ea4ba79cdac2
   languageName: node
   linkType: hard
 
