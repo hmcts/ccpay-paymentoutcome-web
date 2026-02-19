@@ -142,5 +142,5 @@
     "form-data": "~2.5.4",
     "axios": "^1.13.5"
   },
-  "packageManager": "yarn@3.6.1"
+  "packageManager": "yarn@3.8.7"
 }
