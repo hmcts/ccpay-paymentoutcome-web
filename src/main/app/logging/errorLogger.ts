@@ -9,7 +9,6 @@ export class ErrorLogger {
   log (err: any) {
     if (err) {
       this.logger.error(`${err.stack || err}`)
-      this.logger.error(JSON.stringify(err))
     } else {
       this.logger.debug('Received error was blank')
     }
