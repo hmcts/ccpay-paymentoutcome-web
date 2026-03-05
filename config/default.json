@@ -2,7 +2,11 @@
   "useCSRFProtection": true,
   "security": {
     "referrerPolicy": "origin",
-    "clientId": "paymentoutcome_web"
+    "clientId": "paymentoutcome_web",
+    "paymentConfirmationToken": {
+      "secret": "dev-only-payment-confirmation-secret",
+      "allowedClockSkewSeconds": 30
+    }
   },
   "session": {
     "cookieName": "SESSION_ID"

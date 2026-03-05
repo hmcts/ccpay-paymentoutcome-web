@@ -1,6 +1,10 @@
 {
   "security": {
-    "clientId": "paymentoutcome_web"
+    "clientId": "paymentoutcome_web",
+    "paymentConfirmationToken": {
+      "secret": "PAYMENT_CONFIRMATION_TOKEN_SECRET",
+      "allowedClockSkewSeconds": "PAYMENT_CONFIRMATION_TOKEN_ALLOWED_CLOCK_SKEW_SECONDS"
+    }
   },
   "session": {
     "cookieName": "SESSION_ID"

@@ -10,8 +10,15 @@ import request from 'supertest';
 import * as mock from 'nock';
 import * as feesServiceMock from '../../http-mocks/fees';
 import { app } from '../../../main/app';
+import { PaymentConfirmationTokenService } from '../../../main/app/security/paymentConfirmationToken';
 
-const PAGE_URL = '/payment/234dw23ds34/confirmation';
+const paymentId = '234dw23ds34';
+const token = PaymentConfirmationTokenService.createToken({
+  paymentId,
+  payerReference: 'RC-1234-1234-1343-1234',
+  exp: Math.floor(Date.now() / 1000) + 300,
+});
+const PAGE_URL = `/payment/${paymentId}/confirmation?token=${encodeURIComponent(token)}`;
 const headingClass = 'govuk-error-summary__title';
 
 let htmlRes: Document;
