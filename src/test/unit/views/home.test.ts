@@ -21,6 +21,15 @@ const token = PaymentConfirmationTokenService.createToken({
 const PAGE_URL = `/payment/${paymentId}/confirmation?token=${encodeURIComponent(token)}`;
 const headingClass = 'govuk-error-summary__title';
 
+function buildToken(overrides: any = {}): string {
+  return PaymentConfirmationTokenService.createToken({
+    paymentId,
+    payerReference: 'RC-1234-1234-1343-1234',
+    exp: Math.floor(Date.now() / 1000) + 300,
+    ...overrides,
+  });
+}
+
 let htmlRes: Document;
 
 describe('Fee edit page', () => {
@@ -86,6 +95,50 @@ describe('Fee edit page', () => {
     it('should display error body text',  () => {
       const header = htmlRes.getElementsByClassName('govuk-panel__body');
       expect(header[0].innerHTML).contains('Your payment reference is<br><strong>RC-1234-1234-1343-1234</strong>');
+    });
+  });
+
+
+  describe('Home page authorization checks', () => {
+    it('should return 403 when case number claim does not match payment data', async () => {
+      feesServiceMock.resolveGetPaymentStatus('Success');
+      feesServiceMock.resolveCreateToken();
+      const mismatchedCaseToken = buildToken({ caseNumber: '1111222233334444' });
+
+      await request(app)
+        .get(`/payment/${paymentId}/confirmation?token=${encodeURIComponent(mismatchedCaseToken)}`)
+        .expect((res) => expect(res.status).to.equal(403));
+    });
+
+    it('should return 403 when payer reference claim does not match payment data', async () => {
+      feesServiceMock.resolveGetPaymentStatus('Success');
+      feesServiceMock.resolveCreateToken();
+      const mismatchedPayerToken = buildToken({ payerReference: 'RC-9999-9999-9999-9999' });
+
+      await request(app)
+        .get(`/payment/${paymentId}/confirmation?token=${encodeURIComponent(mismatchedPayerToken)}`)
+        .expect((res) => expect(res.status).to.equal(403));
+    });
+  });
+
+
+  describe('Home page branch coverage checks', () => {
+    it('should render Welsh content when language query param is cy', async () => {
+      feesServiceMock.resolveGetPaymentStatus('Success');
+      feesServiceMock.resolveCreateToken();
+
+      await request(app)
+        .get(`${PAGE_URL}&language=cy`)
+        .expect((res) => {
+          expect(res.status).to.equal(200);
+          expect(res.text).contains('Taliad yn llwyddiannus');
+        });
+    });
+
+    it('should return 403 when token is missing', async () => {
+      await request(app)
+        .get(`/payment/${paymentId}/confirmation`)
+        .expect((res) => expect(res.status).to.equal(403));
     });
   });
 });
