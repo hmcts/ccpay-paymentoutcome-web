@@ -7,7 +7,10 @@ nodejs:
     ccpay:
       secrets:
         - paymentoutcome-s2s-web
+        - payment-confirmation-token-secret
   environment:
      S2S_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
      PAYHUB_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
      EXUI_URL: https://manage-case.{{ .Values.global.environment }}.platform.hmcts.net/cases/case-details
+     PAYMENT_CONFIRMATION_TOKEN_SECRET: ""
+     PAYMENT_CONFIRMATION_TOKEN_ALLOWED_CLOCK_SKEW_SECONDS: "30"
