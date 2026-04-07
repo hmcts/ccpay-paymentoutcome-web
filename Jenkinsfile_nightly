@@ -34,7 +34,7 @@ def vaultOverrides = [
 
 withNightlyPipeline(type, product, component) {
 
-  enableSlackNotifications('#ccd-nightly-builds')
+  enableSlackNotifications('#fee-pay-nightly-pipeline')
   enableFortifyScan()
   afterAlways('fortify-scan') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
