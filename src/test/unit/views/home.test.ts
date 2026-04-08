@@ -10,9 +10,14 @@ import request from 'supertest';
 import * as mock from 'nock';
 import * as feesServiceMock from '../../http-mocks/fees';
 import { app } from '../../../main/app';
+import config from 'config';
 
-const PAGE_URL = '/payment/234dw23ds34/confirmation';
+const PAYMENT_ID = '123e4567-e89b-42d3-a456-426614174000';
+const PAGE_URL = `/payment/${PAYMENT_ID}/confirmation`;
 const headingClass = 'govuk-error-summary__title';
+const sessionCookieName: string = config.get<string>('session.cookieName');
+const sessionCookie = `${sessionCookieName}=test-session-id`;
+const userAuthorization = 'Bearer test-user-token';
 
 let htmlRes: Document;
 
@@ -24,7 +29,7 @@ describe('Fee edit page', () => {
 
   describe('Home page error flow', () => {
     beforeAll(async () => {
-      await request(app).get(PAGE_URL).then(res => {
+      await request(app).get(PAGE_URL).set('Cookie', sessionCookie).set('Authorization', userAuthorization).then(res => {
         htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
       });
     });
@@ -45,7 +50,7 @@ describe('Fee edit page', () => {
     beforeAll(async () => {
       feesServiceMock.resolveGetPaymentStatus('error');
       feesServiceMock.resolveCreateToken();
-      await request(app).get(PAGE_URL).then(res => {
+      await request(app).get(PAGE_URL).set('Cookie', sessionCookie).set('Authorization', userAuthorization).then(res => {
         htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
       });
     });
@@ -66,7 +71,7 @@ describe('Fee edit page', () => {
     beforeAll(async () => {
       feesServiceMock.resolveGetPaymentStatus('Success');
       feesServiceMock.resolveCreateToken();
-      await request(app).get(PAGE_URL).then(res => {
+      await request(app).get(PAGE_URL).set('Cookie', sessionCookie).set('Authorization', userAuthorization).then(res => {
         htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
       });
     });
