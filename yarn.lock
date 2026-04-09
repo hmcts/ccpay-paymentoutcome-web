@@ -4849,7 +4849,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin-tslint": ^2.19.2
     "@typescript-eslint/parser": ^2.19.2
     applicationinsights: ^1.8.8
-    axios: ^1.7.4
+    axios: ^1.15.0
     babel-loader: ^8.0.6
     chai: ^4.2.0
     chai-as-promised: ^7.1.1
