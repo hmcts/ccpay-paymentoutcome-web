@@ -6,12 +6,20 @@ const payhubUrl =  config.get('payhub.url');
 const paymentoutcomeSecret = config.get('secrets.ccpay.paymentoutcome-s2s-web');
 const microService = config.get('security.clientId');
 
+export interface PaymentStatus {
+  status: string;
+  reference?: string;
+  ccd_case_number?: string;
+  [key: string]: any;
+}
+
 export class PayhubService {
-  static async getPaymentStatus (uuid: string): Promise<boolean> {
+  static async getPaymentStatus (uuid: string, userAuthorization: string): Promise<PaymentStatus> {
     const token = await this.createAuthToken();
     const response = await wrappedFetch(`${payhubUrl}/card-payments/${uuid}/status`, {
       method: 'GET',
       headers: {
+        Authorization: userAuthorization,
         ServiceAuthorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },

@@ -9,7 +9,7 @@ describe('payhub service', () => {
     it('should return the data when the server replies', async () => {
       feesServiceMock.resolveCreateToken()
       feesServiceMock.resolveGetPaymentStatus('sdfasdfasdfasdfgswdfawef');
-      expect(PayhubService.getPaymentStatus('sdfasdfasdfasdfgswdfawef')).to.not.equal(null)
+      expect(PayhubService.getPaymentStatus('sdfasdfasdfasdfgswdfawef', 'Bearer test-user-auth')).to.not.equal(null)
     })
   })
   describe('on GET s2s token ', () => {

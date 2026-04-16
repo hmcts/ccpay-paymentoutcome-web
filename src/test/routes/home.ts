@@ -25,6 +25,7 @@ describe('Home page', () => {
 
       await request(app)
         .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Payment successful');
@@ -38,6 +39,7 @@ describe('Home page', () => {
 
       await request(app)
         .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=cy')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Taliad yn llwyddiannus');
@@ -50,6 +52,7 @@ describe('Home page', () => {
 
       await request(app)
         .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('There is a problem');
@@ -62,6 +65,7 @@ describe('Home page', () => {
 
       await request(app)
         .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('There is a problem');
@@ -74,6 +78,7 @@ describe('Home page', () => {
 
       await request(app)
         .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=cy')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Mae yna broblem');
