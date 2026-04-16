@@ -20,6 +20,28 @@ describe('Home page', () => {
   });
 
   describe('on GET /payment/:id/confirmation', () => {
+    test('returns 401 when Authorization header is missing', async () => {
+      // Should not call upstream services when unauthenticated
+      await request(app)
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .expect((res) => {
+          expect(res.status).to.equal(401);
+          expect(res.text).to.contain('There is a problem');
+          expect(res.text).to.contain('Your card payment was unsuccessful.');
+        });
+    });
+
+    test('returns 400 when payment id is not a valid UUID', async () => {
+      await request(app)
+        .get('/payment/not-a-uuid/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
+        .expect((res) => {
+          expect(res.status).to.equal(400);
+          expect(res.text).to.contain('There is a problem');
+          expect(res.text).to.contain('Your card payment was unsuccessful.');
+        });
+    });
+
     test('renders English success page when payment status is Success', async () => {
       resolveGetPaymentStatusWithStatus('Success');
 
