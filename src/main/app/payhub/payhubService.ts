@@ -16,16 +16,18 @@ export interface PaymentStatus {
 export class PayhubService {
   static async getPaymentStatus (uuid: string, userAuthorization: string): Promise<PaymentStatus> {
     const token = await this.createAuthToken();
+    console.error('-------PayhubService PayhubService-------');
     const response = await wrappedFetch(`${payhubUrl}/card-payments/${uuid}/status`, {
       method: 'GET',
       headers: {
-        Authorization: userAuthorization,
+        Authorization: `Bearer ${userAuthorization}`,
         ServiceAuthorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
+      console.error('-------PayhubService PayhubService Error-------');
       throw new Error(`Failed to fetch payment status: ${response.statusText}`);
     }
     return response.json();

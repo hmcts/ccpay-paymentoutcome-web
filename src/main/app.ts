@@ -15,6 +15,7 @@ import { PropertiesVolume } from './modules/properties-volume';
 import { AppInsights } from './modules/appinsights';
 const { setupDev } = require('./development');
 
+
 const env = process.env.NODE_ENV || 'development';
 const developmentMode = env === 'development';
 
@@ -28,7 +29,12 @@ new AppInsights().enable();
 new Nunjucks(developmentMode).enableFor(app);
 new Helmet(config.get('security')).enableFor(app);
 
-app.use(favicon(path.join(__dirname, '/public/img/favicon.ico')));
+
+
+app.use(
+  favicon(path.join(__dirname, 'public', 'img', 'favicon.ico')) as unknown as import('express').RequestHandler
+);
+
 
 app.use(bodyParser.json() as RequestHandler);
 app.use(bodyParser.urlencoded({ extended: false }) as RequestHandler);
