@@ -61,7 +61,6 @@ export class PayhubService {
           console.error('IDAM validation returned non-JSON or empty response', err);
           throw err;
         }
-        console.log('IDAM validation succeeded');
         return;
       console.error('IDAM validation error:', response.status, response.statusText);
       throw new Error(`Failed to get auth token: ${response.statusText}`);

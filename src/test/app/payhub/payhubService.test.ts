@@ -7,6 +7,7 @@ describe('payhub service', () => {
 
   describe('on GET payment status', () => {
     it('should return the data when the server replies', async () => {
+      feesServiceMock.resolveValidateUserToken()
       feesServiceMock.resolveCreateToken()
       feesServiceMock.resolveGetPaymentStatus('sdfasdfasdfasdfgswdfawef');
       expect(PayhubService.getPaymentStatus('sdfasdfasdfasdfgswdfawef', 'Bearer test-user-auth')).to.not.equal(null)
