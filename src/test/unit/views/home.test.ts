@@ -82,6 +82,8 @@ describe('Fee edit page', () => {
     });
 
     it('should display success title',  () => {
+      // print the full document HTML to the console
+      console.log(htmlRes.documentElement.outerHTML);
       const header = htmlRes.getElementsByClassName('govuk-panel__title');
       expect(header[0].innerHTML).contains('Payment successful');
     });
