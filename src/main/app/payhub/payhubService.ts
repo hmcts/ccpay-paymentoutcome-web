@@ -36,7 +36,6 @@ export class PayhubService {
     });
 
     if (!response.ok) {
-      console.log('-------PayhubService Status Error-------');
       throw new Error(`Failed to fetch payment status: ${response.statusText}`);
     }
     return response.json();
