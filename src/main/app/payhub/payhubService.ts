@@ -5,7 +5,7 @@ const s2sUrl =  config.get('s2s.url');
 const payhubUrl =  config.get('payhub.url');
 const paymentoutcomeSecret = config.get('secrets.ccpay.paymentoutcome-s2s-web');
 const microService = config.get('security.clientId');
-
+const IDAM_URL = 'https://idam-api.demo.platform.hmcts.net/details';
 export interface PaymentStatus {
   status: string;
   reference?: string;
@@ -14,23 +14,56 @@ export interface PaymentStatus {
 }
 
 export class PayhubService {
+
+  private static normalizeAuthHeader(tokenOrHeader: string): string {
+    if (!tokenOrHeader) {
+      return '';
+    }
+    return tokenOrHeader.startsWith('Bearer ') ? tokenOrHeader : `Bearer ${tokenOrHeader}`;
+  }
+
   static async getPaymentStatus (uuid: string, userAuthorization: string): Promise<PaymentStatus> {
+    const authHeader = this.normalizeAuthHeader(userAuthorization);
+    await this.validateUserToken(authHeader);
     const token = await this.createAuthToken();
-    console.error('-------PayhubService PayhubService-------');
     const response = await wrappedFetch(`${payhubUrl}/card-payments/${uuid}/status`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${userAuthorization}`,
+        Authorization: authHeader,
         ServiceAuthorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      console.error('-------PayhubService PayhubService Error-------');
+      console.log('-------PayhubService Status Error-------');
       throw new Error(`Failed to fetch payment status: ${response.statusText}`);
     }
     return response.json();
+  }
+
+  static async validateUserToken(userAuthorization: string): Promise<void> {
+    const response = await wrappedFetch(IDAM_URL, {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        Authorization: userAuthorization,
+      },
+    });
+
+    if (response.ok) {
+      try {
+        const body = await response.json();
+        //console.log('IDAM validation response:', body);
+      } catch (err) {
+        console.error('IDAM validation returned non-JSON response');
+      }
+      console.log('IDAM validation succeeded');
+      return;
+    }
+
+    console.error('IDAM validation error:', response.status, response.statusText);
+    throw new Error(`Failed to get auth token: ${response.statusText}`);
   }
 
   static async createAuthToken(): Promise<string> {
