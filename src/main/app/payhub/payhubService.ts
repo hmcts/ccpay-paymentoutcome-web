@@ -43,50 +43,50 @@ export class PayhubService {
   }
 
   static async validateUserToken(userAuthorization: string): Promise<void> {
-    const response = await wrappedFetch(IDAM_URL, {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        Authorization: userAuthorization,
-      },
-    });
+      const response = await wrappedFetch(IDAM_URL, {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: userAuthorization,
+        },
+      });
 
-    if (response.ok) {
-      try {
-        const body: any = await response.json();
-        if (body == null || body === '') {
-          console.error('IDAM validation returned empty body');
-          throw new Error('IDAM validation returned empty body');
+      if (response.ok) {
+        try {
+          const body: any = await response.json();
+          if (body == null || body === '') {
+            console.error('IDAM validation returned empty body');
+            throw new Error('IDAM validation returned empty body');
+          }
+        } catch (err) {
+          console.error('IDAM validation returned non-JSON or empty response', err);
+          throw err;
         }
-        console.log('IDAM validation response:', body);
-      } catch (err) {
-        console.error('IDAM validation returned non-JSON or empty response', err);
-        throw err;
-      }
-      console.log('IDAM validation succeeded');
-      return;
-    console.error('IDAM validation error:', response.status, response.statusText);
-    throw new Error(`Failed to get auth token: ${response.statusText}`);
+        console.log('IDAM validation succeeded');
+        return;
+      console.error('IDAM validation error:', response.status, response.statusText);
+      throw new Error(`Failed to get auth token: ${response.statusText}`);
+    }
   }
 
   static async createAuthToken(): Promise<string> {
-    const otpPassword = otp({ secret: paymentoutcomeSecret }).totp();
-    const serviceAuthRequest = {
-      microservice: microService,
-      oneTimePassword: otpPassword,
-    };
-    const response = await wrappedFetch(`${s2sUrl}/lease`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(serviceAuthRequest),
-    });
+      const otpPassword = otp({ secret: paymentoutcomeSecret }).totp();
+      const serviceAuthRequest = {
+        microservice: microService,
+        oneTimePassword: otpPassword,
+      };
+      const response = await wrappedFetch(`${s2sUrl}/lease`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(serviceAuthRequest),
+      });
 
-    if (!response.ok) {
-      throw new Error(`Failed to get auth token: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Failed to get auth token: ${response.statusText}`);
+      }
+      // s2s auth returns plain text response
+      return await response.text();
     }
-    // s2s auth returns plain text response
-    return await response.text();
-  }
 }
