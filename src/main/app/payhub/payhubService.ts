@@ -53,14 +53,18 @@ export class PayhubService {
 
     if (response.ok) {
       try {
-        const body = await response.json();
-        //console.log('IDAM validation response:', body);
+        const body: any = await response.json();
+        if (body == null || body === '') {
+          console.error('IDAM validation returned empty body');
+          throw new Error('IDAM validation returned empty body');
+        }
+        console.log('IDAM validation response:', body);
       } catch (err) {
-        console.error('IDAM validation returned non-JSON response');
+        console.error('IDAM validation returned non-JSON or empty response', err);
+        throw err;
       }
       console.log('IDAM validation succeeded');
       return;
-    }
 
     console.error('IDAM validation error:', response.status, response.statusText);
     throw new Error(`Failed to get auth token: ${response.statusText}`);
