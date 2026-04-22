@@ -21,9 +21,10 @@ describe('Fee edit page', () => {
     mock.cleanAll();
   });
 
-
   describe('Home page error flow', () => {
     beforeAll(async () => {
+      feesServiceMock.resolveGetPaymentStatus('error');
+      feesServiceMock.resolveCreateToken();
       await request(app)
         .get(PAGE_URL)
         .set('Authorization', 'Bearer test-user-token')
