@@ -5,6 +5,7 @@ import * as feesServiceMock from '../../http-mocks/fees'
 
 describe('payhub service', () => {
 
+
   describe('normalizeAuthHeader', () => {
     it('returns same header when already Bearer-prefixed', () => {
       const res = (PayhubService as any).normalizeAuthHeader('Bearer abc123');
@@ -17,9 +18,6 @@ describe('payhub service', () => {
     });
   });
 
-
-
-
   describe('on GET payment status', () => {
     it('should return the data when the server replies', async () => {
       feesServiceMock.resolveValidateUserToken()
@@ -28,6 +26,16 @@ describe('payhub service', () => {
       expect(PayhubService.getPaymentStatus('sdfasdfasdfasdfgswdfawef', 'Bearer test-user-auth')).to.not.equal(null)
     })
   })
+
+  describe('on validate user token', () => {
+    it('should return a valid response when the server replies', async () => {
+      feesServiceMock.resolveValidateUserToken()
+      feesServiceMock.resolveValidateUserToken()
+      const res = await PayhubService.validateUserToken('Bearer test-user-auth');
+      expect(res).to.not.equal(null);
+    })
+  })
+
   describe('on GET s2s token ', () => {
     it('should return the s2s token when the server replies', async () => {
       feesServiceMock.resolveCreateToken()
