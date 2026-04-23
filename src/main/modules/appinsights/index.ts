@@ -1,11 +1,11 @@
 import config from 'config';
 
-const appInsights = require('applicationinsights');
-
 export class AppInsights {
 
   enable(): void {
     if (config.get('appInsights.connectionString')) {
+      // Lazy-load to avoid loading ESM-only internals in Jest paths that don't initialize App Insights.
+      const appInsights = require('applicationinsights');
       appInsights.setup(config.get('appInsights.connectionString'))
         .setSendLiveMetrics(true)
         .start();
