@@ -72,18 +72,18 @@ describe('Fee edit page', () => {
   describe('Home page success flow', () => {
     beforeAll(async () => {
       feesServiceMock.resolveGetPaymentStatus('Success');
+      feesServiceMock.resolveValidateUserToken()
       feesServiceMock.resolveCreateToken();
       await request(app)
         .get(PAGE_URL)
         .set('Authorization', 'Bearer test-user-token')
         .then(res => {
+          status = res.status.toString();
           htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
         });
     });
 
     it('should display success title',  () => {
-      // print the full document HTML to the console
-      console.log(htmlRes.documentElement.outerHTML);
       const header = htmlRes.getElementsByClassName('govuk-panel__title');
       expect(header[0].innerHTML).contains('Payment successful');
     });
