@@ -9,7 +9,7 @@ export class PropertiesVolume {
     if (server.locals.ENV !== 'development') {
       propertiesVolume.addTo(config);
 
-      this.setSecret('secrets.rpe.app-insights-connection-string', 'appInsights.connectionString');
+      this.setSecret('app-insights-connection-string', 'appInsights.connectionString');
     }
   }
 

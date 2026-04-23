@@ -19,6 +19,7 @@
   "appInsights": {
     "connectionString": false
   },
+  "app-insights-connection-string": false,
   "e2e": {
     "frontendUrl": "https://localhost:4200/",
     "waitForTimeoutValue": 2600,
