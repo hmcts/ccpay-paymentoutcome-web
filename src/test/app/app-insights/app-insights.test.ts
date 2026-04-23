@@ -29,8 +29,7 @@ describe('app insights bootstrap', () => {
 
   it('starts application insights when connection string exists', () => {
     const startMock = jest.fn();
-    const setConnectionStringMock = jest.fn().mockReturnValue({ start: startMock });
-    const setupMock = jest.fn().mockReturnValue({ setConnectionString: setConnectionStringMock });
+    const setupMock = jest.fn().mockReturnValue({ start: startMock });
 
     jest.doMock('config', () => ({
       get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
@@ -49,8 +48,7 @@ describe('app insights bootstrap', () => {
       enableAppInsights();
     });
 
-    expect(setupMock).toHaveBeenCalledWith();
-    expect(setConnectionStringMock).toHaveBeenCalledWith('InstrumentationKey=test-key;IngestionEndpoint=https://test/');
+    expect(setupMock).toHaveBeenCalledWith('InstrumentationKey=test-key;IngestionEndpoint=https://test/');
     expect(startMock).toHaveBeenCalled();
   });
 

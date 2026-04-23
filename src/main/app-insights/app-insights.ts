@@ -13,8 +13,7 @@ function enableAppInsights(): void {
 
   try {
     appInsights
-      .setup()
-      .setConnectionString(String(connectionString))
+      .setup(String(connectionString))
       .start();
 
     logger.info('Application Insights enabled');
