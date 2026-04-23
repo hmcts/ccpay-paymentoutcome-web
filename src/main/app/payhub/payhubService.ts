@@ -62,8 +62,8 @@ export class PayhubService {
           throw err;
         }
         return;
-      console.error('IDAM validation error:', response.status, response.statusText);
-      throw new Error(`Failed to get auth token: ${response.statusText}`);
+    } else {
+      throw new Error(`Failed to get auth token: ${response.statusText}  ${response.status}` );
     }
   }
 
