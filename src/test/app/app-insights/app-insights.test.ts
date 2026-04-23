@@ -4,7 +4,7 @@ describe('app insights bootstrap', () => {
     jest.clearAllMocks();
   });
 
-  it('does nothing when instrumentation key is missing', () => {
+  it('does nothing when connection string is missing', () => {
     const setupMock = jest.fn();
 
     jest.doMock('config', () => ({
@@ -27,12 +27,13 @@ describe('app insights bootstrap', () => {
     expect(setupMock).not.toHaveBeenCalled();
   });
 
-  it('starts application insights when instrumentation key exists', () => {
+  it('starts application insights when connection string exists', () => {
     const startMock = jest.fn();
-    const setupMock = jest.fn().mockReturnValue({ start: startMock });
+    const setConnectionStringMock = jest.fn().mockReturnValue({ start: startMock });
+    const setupMock = jest.fn().mockReturnValue({ setConnectionString: setConnectionStringMock });
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue('test-key')
+      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
     }));
     jest.doMock('applicationinsights', () => ({
       setup: setupMock
@@ -48,7 +49,8 @@ describe('app insights bootstrap', () => {
       enableAppInsights();
     });
 
-    expect(setupMock).toHaveBeenCalledWith('test-key');
+    expect(setupMock).toHaveBeenCalledWith();
+    expect(setConnectionStringMock).toHaveBeenCalledWith('InstrumentationKey=test-key;IngestionEndpoint=https://test/');
     expect(startMock).toHaveBeenCalled();
   });
 
@@ -59,7 +61,7 @@ describe('app insights bootstrap', () => {
     });
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue('test-key')
+      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
     }));
     jest.doMock('applicationinsights', () => ({
       setup: setupMock

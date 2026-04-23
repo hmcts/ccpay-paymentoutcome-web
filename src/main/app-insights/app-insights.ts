@@ -5,15 +5,16 @@ const { Logger } = require('@hmcts/nodejs-logging');
 const logger = Logger.getLogger('app-insights');
 
 function enableAppInsights(): void {
-  const instrumentationKey = config.get('appInsights.instrumentationKey');
+  const connectionString = config.get('appInsights.connectionString');
 
-  if (!instrumentationKey || instrumentationKey === 'false') {
+  if (!connectionString || connectionString === 'false') {
     return;
   }
 
   try {
     appInsights
-      .setup(String(instrumentationKey))
+      .setup()
+      .setConnectionString(String(connectionString))
       .start();
 
     logger.info('Application Insights enabled');
