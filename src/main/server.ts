@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const enableAppInsights = require('./app-insights/app-insights');
+enableAppInsights();
 
 const { Logger } = require('@hmcts/nodejs-logging');
 import { app } from './app';
