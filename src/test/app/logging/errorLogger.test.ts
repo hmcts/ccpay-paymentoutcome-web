@@ -30,11 +30,11 @@ describe('ErrorLogger', () => {
     new ErrorLogger().log('boom');
 
     expect(getLoggerMock).toHaveBeenCalledWith('errorLogger.js');
-    expect(defaultLogger.error).toHaveBeenNthCalledWith(1, 'boom');
-    expect(defaultLogger.error).toHaveBeenNthCalledWith(2, JSON.stringify('boom'));
+    expect(defaultLogger.error).toHaveBeenCalledTimes(1);
+    expect(defaultLogger.error).toHaveBeenCalledWith('boom');
   });
 
-  test('logs stack and serialized error when stack is present', () => {
+  test('logs stack when stack is present', () => {
     const ErrorLogger = loadErrorLogger();
     const logger = {
       error: jest.fn(),
@@ -45,8 +45,8 @@ describe('ErrorLogger', () => {
 
     new ErrorLogger(logger).log(err);
 
-    expect(logger.error).toHaveBeenNthCalledWith(1, 'sample stack');
-    expect(logger.error).toHaveBeenNthCalledWith(2, JSON.stringify(err));
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith('sample stack');
     expect(logger.debug).not.toHaveBeenCalled();
   });
 
@@ -59,8 +59,8 @@ describe('ErrorLogger', () => {
 
     new ErrorLogger(logger).log('boom');
 
-    expect(logger.error).toHaveBeenNthCalledWith(1, 'boom');
-    expect(logger.error).toHaveBeenNthCalledWith(2, JSON.stringify('boom'));
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith('boom');
     expect(logger.debug).not.toHaveBeenCalled();
   });
 
