@@ -28,14 +28,14 @@ describe('AppInsights module', () => {
     jest.clearAllMocks();
   });
 
-  test('starts app insights and sets cloud role when instrumentation key exists', () => {
+  test('starts app insights and sets cloud role when connection string exists', () => {
     const mocks = createMocks();
 
     jest.isolateModules(() => {
       jest.doMock('config', () => ({
         __esModule: true,
         default: {
-          get: jest.fn().mockReturnValue('instrumentation-key')
+          get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
         }
       }));
 
@@ -56,14 +56,14 @@ describe('AppInsights module', () => {
       new AppInsights().enable();
     });
 
-    expect(mocks.setup).toHaveBeenCalledWith('instrumentation-key');
+    expect(mocks.setup).toHaveBeenCalledWith('InstrumentationKey=test-key;IngestionEndpoint=https://test/');
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
     expect(mocks.tags.cloudRole).toBe('rpe-expressjs-template');
     expect(mocks.trackTrace).toHaveBeenCalledWith({ message: 'App insights activated' });
   });
 
-  test('does nothing when instrumentation key is not configured', () => {
+  test('does nothing when connection string is not configured', () => {
     const mocks = createMocks();
 
     jest.isolateModules(() => {
