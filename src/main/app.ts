@@ -23,6 +23,9 @@ app.locals.ENV = env;
 const logger = Logger.getLogger('app');
 
 new PropertiesVolume().enableFor(app);
+// Same init order as legacy AppInsights module: after secrets volume, before routes (and PayHub client load).
+const enableAppInsights = require('./app-insights/app-insights');
+enableAppInsights();
 new Nunjucks(developmentMode).enableFor(app);
 new Helmet(config.get('security')).enableFor(app);
 

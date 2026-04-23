@@ -13,7 +13,14 @@ function enableAppInsights(): void {
   try {
     // Lazy-load so tests importing app.ts don't eagerly load App Insights internals.
     const appInsights = require('applicationinsights');
-    appInsights.setup(String(connectionString)).start();
+    appInsights.setup(String(connectionString))
+      .setSendLiveMetrics(true)
+      .start();
+
+    appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] =
+      'rpe-expressjs-template';
+    appInsights.defaultClient.trackTrace({ message: 'App insights activated' });
+
     logger.info('Application Insights enabled');
   } catch (error) {
     logger.warn('Application Insights setup failed; continuing without telemetry', error);
