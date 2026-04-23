@@ -12,7 +12,6 @@ import favicon from 'serve-favicon';
 import { HTTPError } from 'HttpError';
 import { Nunjucks } from './modules/nunjucks';
 import { PropertiesVolume } from './modules/properties-volume';
-import { AppInsights } from './modules/appinsights';
 const { setupDev } = require('./development');
 
 const env = process.env.NODE_ENV || 'development';
@@ -24,7 +23,6 @@ app.locals.ENV = env;
 const logger = Logger.getLogger('app');
 
 new PropertiesVolume().enableFor(app);
-new AppInsights().enable();
 new Nunjucks(developmentMode).enableFor(app);
 new Helmet(config.get('security')).enableFor(app);
 
