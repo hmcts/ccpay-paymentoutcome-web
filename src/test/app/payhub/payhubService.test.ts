@@ -49,6 +49,16 @@ describe('payhub service', () => {
         expect(err).to.not.equal(null);
       }
     })
+
+    it('should throw when server responds with non-OK (401) status', async () => {
+      feesServiceMock.resolveValidateUserTokenWith401();
+      try {
+        await PayhubService.validateUserToken('Bearer test-user-auth');
+        throw new Error('Expected validateUserToken to throw when response is 401');
+      } catch (err) {
+        expect(err).to.not.equal(null);
+      }
+    })
   })
 
   describe('on GET s2s token ', () => {

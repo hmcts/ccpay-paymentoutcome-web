@@ -21,6 +21,13 @@ export function  resolveValidateUserTokenWithEmptyBody () {
    .reply(HttpStatus.OK);
 }
 
+export function  resolveValidateUserTokenWith401 () {
+ mock(`${idamUrl}`)
+   .persist()
+   .get(/.*/)
+   .reply(HttpStatus.UNAUTHORIZED);
+}
+
 
 export function  resolveValidateUserToken () {
   const responseValidateToken = {
