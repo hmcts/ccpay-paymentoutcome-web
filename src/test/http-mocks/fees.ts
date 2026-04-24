@@ -14,6 +14,13 @@ function validFeeWithStatus (status: string) {
   }
 }
 
+export function  resolveValidateUserTokenWithEmptyBody () {
+ mock(`${idamUrl}`)
+   .persist()
+   .get(/.*/)
+   .reply(HttpStatus.OK);
+}
+
 
 export function  resolveValidateUserToken () {
   const responseValidateToken = {

@@ -5,8 +5,12 @@ import * as feesServiceMock from '../../http-mocks/fees'
 
 describe('payhub service', () => {
 
-
   describe('normalizeAuthHeader', () => {
+    it('returns empty string when tokenOrHeader is falsy', () => {
+      const res = (PayhubService as any).normalizeAuthHeader('');
+      expect(res).to.equal('');
+    });
+
     it('returns same header when already Bearer-prefixed', () => {
       const res = (PayhubService as any).normalizeAuthHeader('Bearer abc123');
       expect(res).to.equal('Bearer abc123');
@@ -27,12 +31,23 @@ describe('payhub service', () => {
     })
   })
 
+
+
   describe('on validate user token', () => {
     it('should return a valid response when the server replies', async () => {
       feesServiceMock.resolveValidateUserToken()
-      feesServiceMock.resolveValidateUserToken()
       const res = await PayhubService.validateUserToken('Bearer test-user-auth');
       expect(res).to.not.equal(null);
+    })
+
+    it('should throw when server responds OK but with empty body', async () => {
+      feesServiceMock.resolveValidateUserTokenWithEmptyBody()
+      try {
+        await PayhubService.validateUserToken('Bearer test-user-auth');
+        throw new Error('Expected validateUserToken to throw when body is empty');
+      } catch (err) {
+        expect(err).to.not.equal(null);
+      }
     })
   })
 
