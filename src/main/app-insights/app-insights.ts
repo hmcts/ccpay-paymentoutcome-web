@@ -5,7 +5,6 @@ const logger = Logger.getLogger('app-insights');
 
 function enableAppInsights(): void {
   try {
-    logger.info(config.get('appInsights.connectionString'));
     if (config.get('appInsights.connectionString')) {
           // Lazy-load to avoid loading ESM-only internals in Jest paths that don't initialize App Insights.
           const appInsights = require('applicationinsights');
