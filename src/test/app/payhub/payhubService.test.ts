@@ -5,10 +5,10 @@ import * as feesServiceMock from '../../http-mocks/fees'
 
 describe('payhub service', () => {
 
+
   describe('normalizeAuthHeader', () => {
     it('returns empty string when tokenOrHeader is falsy', () => {
-      const res = (PayhubService as any).normalizeAuthHeader('');
-      expect(res).to.equal('');
+      expect(() => (PayhubService as any).normalizeAuthHeader('')).to.throw('Missing user authorization token');
     });
 
     it('returns same header when already Bearer-prefixed', () => {

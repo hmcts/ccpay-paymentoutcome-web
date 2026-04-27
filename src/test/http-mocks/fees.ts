@@ -4,7 +4,7 @@ import * as HttpStatus from 'http-status-codes';
 
 const serviceBaseURL: string = config.get<string>('payhub.url')
 const s2sUrl: string = config.get<string>('s2s.url')
-const idamUrl: string = 'https://idam-api.demo.platform.hmcts.net/details'
+const idamUrl: string = config.get<string>('idam.url')
 
 function validFeeWithStatus (status: string) {
   return {

@@ -5,7 +5,7 @@ const s2sUrl =  config.get('s2s.url');
 const payhubUrl =  config.get('payhub.url');
 const paymentoutcomeSecret = config.get('secrets.ccpay.paymentoutcome-s2s-web');
 const microService = config.get('security.clientId');
-const IDAM_URL = 'https://idam-api.demo.platform.hmcts.net/details';
+const idamUrl = config.get('idam.url') as string;
 export interface PaymentStatus {
   status: string;
   reference?: string;
@@ -17,7 +17,7 @@ export class PayhubService {
 
   private static normalizeAuthHeader(tokenOrHeader: string): string {
     if (!tokenOrHeader) {
-      return '';
+      throw new Error('Missing user authorization token');
     }
     return tokenOrHeader.startsWith('Bearer ') ? tokenOrHeader : `Bearer ${tokenOrHeader}`;
   }
@@ -42,7 +42,7 @@ export class PayhubService {
   }
 
   static async validateUserToken(userAuthorization: string): Promise<void> {
-      const response = await wrappedFetch(IDAM_URL, {
+      const response = await wrappedFetch(`${idamUrl}`, {
         method: 'GET',
         headers: {
           accept: 'application/json',
