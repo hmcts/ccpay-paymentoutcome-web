@@ -5,6 +5,7 @@ import request from 'supertest';
 import { app } from '../../main/app';
 import {
   rejectGetPaymentStatus,
+  resolveValidateUserToken,
   resolveCreateToken,
   resolveGetPaymentStatusWithStatus
 } from '../http-mocks/fees';
@@ -12,6 +13,7 @@ import {
 describe('Home page', () => {
   beforeEach(() => {
     mock.cleanAll();
+    resolveValidateUserToken();
     resolveCreateToken();
   });
 
