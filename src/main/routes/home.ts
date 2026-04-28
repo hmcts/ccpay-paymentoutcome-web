@@ -18,21 +18,26 @@ export default function(app: Application): void {
 
   app.get('/payment/:id/confirmation', (req, res) => {
     const uuid = req.params.id;
+    const userAuthorization = req.get('Authorization');
+
+    const language = getLanguage(req.url);
+    const render = language === "cy" ? 'home-welsh' : 'home';
+
+    // Require end-user auth to prevent unauthenticated access by UUID (IDOR)
+    if (!userAuthorization) {
+      return res.status(401).render(render, { error: true, result: [], url: exuiUrl });
+    }
+
     PayhubService
-    .getPaymentStatus(uuid)
-    .then((r: any) => {
-      const language = getLanguage(req.url);
-      const render = language === "cy" ? 'home-welsh' : 'home';
-      if(r.status == "Success") {
-      res.render(render, { error: false, result: r, url: exuiUrl});
-      }
-      else {
-       res.render(render, { error: true, result: r, url: exuiUrl });
-      }
-    }).catch(()=> {
-      const language = getLanguage(req.url);
-      const render = language === "cy" ? 'home-welsh' : 'home';
-      res.render(render, { error: true, result: [], url: exuiUrl });
-    });
+      .getPaymentStatus(uuid, userAuthorization)
+      .then((r: any) => {
+        if (r.status === "Success") {
+          res.render(render, { error: false, result: r, url: exuiUrl });
+        } else {
+          res.render(render, { error: true, result: r, url: exuiUrl });
+        }
+      }).catch(() => {
+        res.render(render, { error: true, result: [], url: exuiUrl });
+      });
   });
 }

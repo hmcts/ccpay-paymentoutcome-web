@@ -13,6 +13,9 @@
   "exui": {
     "url": "https://manage-case.prod.platform.hmcts.net/cases/case-details"
   },
+  "idam": {
+    "url": "https://idam-api.demo.platform.hmcts.net/details"
+  },
   "s2s": {
     "url": "http://rpe-service-auth-provider-prod.service.core-compute-prod.internal"
   },
