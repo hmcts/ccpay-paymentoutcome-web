@@ -23,6 +23,8 @@ export function resolveCreateToken () {
 export function resolveGetPaymentStatus (id: any) {
   mock(`${serviceBaseURL}`)
     .persist()
+    .matchHeader('authorization', /Bearer\s+\S+/)
+    .matchHeader('serviceauthorization', /Bearer\s+\S+/)
     .get(/.*/)
     .reply(HttpStatus.OK, validFeeWithStatus(id))
 }
