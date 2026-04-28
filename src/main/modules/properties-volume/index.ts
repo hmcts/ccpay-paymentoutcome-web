@@ -9,13 +9,24 @@ export class PropertiesVolume {
     if (server.locals.ENV !== 'development') {
       propertiesVolume.addTo(config);
 
-      this.setSecret('secrets.rpe.AppInsightsInstrumentationKey', 'appInsights.instrumentationKey');
+      this.setFirstAvailableSecret(
+        [
+          ['secrets', 'app-insights-connection-string'],
+          ['secrets', 'ccpay', 'app-insights-connection-string'],
+          ['app-insights-connection-string']
+        ],
+        'appInsights.connectionString',
+      );
     }
   }
 
-  private setSecret(fromPath: string, toPath: string): void {
-    if (config.has(fromPath)) {
-      set(config, toPath, get(config, fromPath));
+  private setFirstAvailableSecret(fromPaths: string[][], toPath: string): void {
+    for (const fromPath of fromPaths) {
+      const value = get(config, fromPath);
+      if (typeof value === 'string' && value.trim() !== '') {
+        set(config, toPath, value);
+        return;
+      }
     }
   }
 
