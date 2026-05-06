@@ -28,6 +28,26 @@ export default function(app: Application): void {
       return res.status(401).render(render, { error: true, result: [], url: exuiUrl });
     }
 
+    // Null-safe cookie reader and logger
+    const parseCookies = (cookieHeader: string | undefined) => {
+      if (!cookieHeader) return {};
+      return cookieHeader
+        .split(';')
+        .map(c => c.trim())
+        .filter(Boolean)
+        .reduce((acc: Record<string, string>, pair) => {
+          const [key, ...val] = pair.split('=');
+          acc[decodeURIComponent(key || '')] = decodeURIComponent((val.join('=') || '') as string);
+          return acc;
+        }, {});
+    };
+
+    const cookies = (req && (req as any).cookies && Object.keys((req as any).cookies).length)
+      ? (req as any).cookies
+      : parseCookies(req && req.headers ? (req.headers.cookie as string | undefined) : undefined);
+
+    console.log('All cookies:', cookies);
+
     PayhubService
       .getPaymentStatus(uuid, userAuthorization)
       .then((r: any) => {
