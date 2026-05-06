@@ -11,7 +11,7 @@ import * as mock from 'nock';
 import * as feesServiceMock from '../../http-mocks/fees';
 import { app } from '../../../main/app';
 
-const PAGE_URL = '/payment/234dw23ds34/confirmation';
+const PAGE_URL = '/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation';
 const headingClass = 'govuk-error-summary__title';
 
 let htmlRes: Document;
@@ -21,12 +21,16 @@ describe('Fee edit page', () => {
     mock.cleanAll();
   });
 
-
   describe('Home page error flow', () => {
     beforeAll(async () => {
-      await request(app).get(PAGE_URL).then(res => {
-        htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
-      });
+      feesServiceMock.resolveGetPaymentStatus('error');
+      feesServiceMock.resolveCreateToken();
+      await request(app)
+        .get(PAGE_URL)
+        .set('Authorization', 'Bearer test-user-token')
+        .then(res => {
+          htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
+        });
     });
 
     it('should display error header',  () => {
@@ -45,9 +49,12 @@ describe('Fee edit page', () => {
     beforeAll(async () => {
       feesServiceMock.resolveGetPaymentStatus('error');
       feesServiceMock.resolveCreateToken();
-      await request(app).get(PAGE_URL).then(res => {
-        htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
-      });
+      await request(app)
+        .get(PAGE_URL)
+        .set('Authorization', 'Bearer test-user-token')
+        .then(res => {
+          htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
+        });
     });
 
     it('should display error header',  () => {
@@ -65,10 +72,15 @@ describe('Fee edit page', () => {
   describe('Home page success flow', () => {
     beforeAll(async () => {
       feesServiceMock.resolveGetPaymentStatus('Success');
+      feesServiceMock.resolveValidateUserToken()
       feesServiceMock.resolveCreateToken();
-      await request(app).get(PAGE_URL).then(res => {
-        htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
-      });
+      await request(app)
+        .get(PAGE_URL)
+        .set('Authorization', 'Bearer test-user-token')
+        .then(res => {
+          status = res.status.toString();
+          htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
+        });
     });
 
     it('should display success title',  () => {
@@ -79,6 +91,46 @@ describe('Fee edit page', () => {
     it('should display error body text',  () => {
       const header = htmlRes.getElementsByClassName('govuk-panel__body');
       expect(header[0].innerHTML).contains('Your payment reference is<br><strong>RC-1234-1234-1343-1234</strong>');
+    });
+  });
+
+
+  describe('Home page invalid UUID flow', () => {
+    beforeAll(async () => {
+      await request(app)
+        .get('/payment/not-a-uuid/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
+        .then(res => {
+          htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
+        });
+    });
+
+    it('should display error header for invalid uuid', () => {
+      const header = htmlRes.getElementsByClassName(headingClass);
+      expect(header[0].innerHTML).contains('There is a problem');
+    });
+  });
+
+
+  describe('Home page missing Authorization flow', () => {
+    let statusCode: number;
+
+    beforeAll(async () => {
+      await request(app)
+        .get(PAGE_URL)
+        .then(res => {
+          statusCode = res.status;
+          htmlRes = new DOMParser().parseFromString(res.text, 'text/html');
+        });
+    });
+
+    it('should return 401 when Authorization header is missing', () => {
+      expect(statusCode).to.equal(401);
+    });
+
+    it('should display error header when unauthenticated', () => {
+      const header = htmlRes.getElementsByClassName(headingClass);
+      expect(header[0].innerHTML).contains('There is a problem');
     });
   });
 });
