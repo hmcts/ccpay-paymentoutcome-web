@@ -46,7 +46,9 @@ export default function(app: Application): void {
       ? (req as any).cookies
       : parseCookies(req && req.headers ? (req.headers.cookie as string | undefined) : undefined);
 
-    console.log('All cookies:', cookies);
+    console.error('------------------------');
+    console.error('All cookies:', cookies);
+    console.error('------------------------');
 
     PayhubService
       .getPaymentStatus(uuid, userAuthorization)
