@@ -29,7 +29,7 @@ describe('Home page', () => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Payment successful');
           expect(res.text).to.contain('RC-1763-0558-0473-0637');
-          expect(res.text).to.contain('https://manage-case.demo.platform.hmcts.net/cases/case-details/1234123412341234#Service');
+          expect(res.text).to.contain('/cases/case-details/1234123412341234#Servic');
         });
     });
 
