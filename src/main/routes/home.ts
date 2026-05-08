@@ -1,7 +1,10 @@
 import { Application } from 'express';
 import { PayhubService } from '../app/payhub/payhubService';
+import { hmacSha256 } from '../app/util/hmac';
+import { compareHashes } from '../app/util/hmac';
 const config = require('config');
 const url = require('url');
+
 const exuiUrl =  config.get('exui.url').replace('.prod', '');
 
 function getLanguage(urlString: any) {
@@ -16,23 +19,37 @@ function getLanguage(urlString: any) {
 
 export default function(app: Application): void {
 
-  app.get('/payment/:id/confirmation', (req, res) => {
+  app.get('/payment/:id/confirmation/:rc', (req, res) => {
     const uuid = req.params.id;
+    const rc = req.params.rc;
+    const language = getLanguage(req.url);
+    const render = language === "cy" ? 'home-welsh' : 'home';
     PayhubService
     .getPaymentStatus(uuid)
     .then((r: any) => {
-      const language = getLanguage(req.url);
-      const render = language === "cy" ? 'home-welsh' : 'home';
       if(r.status == "Success") {
-      res.render(render, { error: false, result: r, url: exuiUrl});
-      }
-      else {
-       res.render(render, { error: true, result: r, url: exuiUrl });
+        const reference = r.reference;
+        console.log( 'My reference is: ', reference);
+        const hashReference = hmacSha256('toto1234!',reference);
+        console.log( 'My hash reference from response: ', hashReference);
+
+        console.log( 'My hash reference from url: ',rc);
+
+        console.log('rendering home page with result: ',render);
+
+        // Compare the hash of the reference with the provided rc value passed as parameter by the consumer.
+        //If they match, render the home page with the result, otherwise render the home page with an error message.
+        if (compareHashes(hashReference,rc)){
+          res.render('home', { error: false, result: r, url: exuiUrl});
+        } else {
+          console.log('401!!!!!!!');
+          return res.status(401).render(render, { error: true, result: [], url: exuiUrl });
+        }
+      } else {
+        res.render(render, { error: true, result: r, url: exuiUrl });
       }
     }).catch(()=> {
-      const language = getLanguage(req.url);
-      const render = language === "cy" ? 'home-welsh' : 'home';
-      res.render(render, { error: true, result: [], url: exuiUrl });
+        res.render(render, { error: true, result: [], url: exuiUrl });
     });
   });
 }
