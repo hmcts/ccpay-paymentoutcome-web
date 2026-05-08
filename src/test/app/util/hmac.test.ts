@@ -27,4 +27,14 @@ describe('compareHashes', () => {
   test('returns false for different lengths', () => {
     expect(compareHashes('a', 'aa')).toBe(false);
   });
+
+  test("compareHashes returns false for same-length different hex strings", () => {
+    const a = "a".repeat(64); // valid hex
+    const b = "b".repeat(64); // valid hex
+    expect(compareHashes(a, b)).toBe(false);
+  });
+
+  test("compareHashes returns false for different-length strings", () => {
+    expect(compareHashes("aa", "aaaa")).toBe(false);
+  });
 });

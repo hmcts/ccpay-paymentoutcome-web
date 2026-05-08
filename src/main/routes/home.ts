@@ -1,7 +1,6 @@
 import { Application } from 'express';
 import { PayhubService } from '../app/payhub/payhubService';
-import { hmacSha256 } from '../app/util/hmac';
-import { compareHashes } from '../app/util/hmac';
+import { hmacSha256, compareHashes } from '../app/util/hmac';
 const config = require('config');
 const url = require('url');
 
@@ -29,7 +28,7 @@ export default function(app: Application): void {
 
     PayhubService
       .getPaymentStatus(uuid)
-        .then((r: any) => {1
+        .then((r: any) => {
           if(r.status == "Success") {
             const reference = r.reference;
             console.log( 'My reference is: ', reference);
