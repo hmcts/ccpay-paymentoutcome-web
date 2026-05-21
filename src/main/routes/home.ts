@@ -14,6 +14,10 @@ function getLanguage(urlString: any) {
   }
 }
 
+function isPaymentSuccess(status: unknown): boolean {
+  return typeof status === 'string' && status.trim().toLowerCase() === 'success';
+}
+
 export default function(app: Application): void {
 
   app.get('/payment/:id/confirmation', (req, res) => {
@@ -23,7 +27,7 @@ export default function(app: Application): void {
     .then((r: any) => {
       const language = getLanguage(req.url);
       const render = language === "cy" ? 'home-welsh' : 'home';
-      if(r.status == "Success") {
+      if (isPaymentSuccess(r?.status)) {
       res.render(render, { error: false, result: r, url: exuiUrl});
       }
       else {

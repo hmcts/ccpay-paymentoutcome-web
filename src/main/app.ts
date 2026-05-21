@@ -12,7 +12,6 @@ import favicon from 'serve-favicon';
 import { HTTPError } from 'HttpError';
 import { Nunjucks } from './modules/nunjucks';
 import { PropertiesVolume } from './modules/properties-volume';
-import { AppInsights } from './modules/appinsights';
 const { setupDev } = require('./development');
 
 const env = process.env.NODE_ENV || 'development';
@@ -24,7 +23,9 @@ app.locals.ENV = env;
 const logger = Logger.getLogger('app');
 
 new PropertiesVolume().enableFor(app);
-new AppInsights().enable();
+// Same init order as legacy AppInsights module: after secrets volume, before routes (and PayHub client load).
+const enableAppInsights = require('./app-insights/app-insights');
+enableAppInsights();
 new Nunjucks(developmentMode).enableFor(app);
 new Helmet(config.get('security')).enableFor(app);
 

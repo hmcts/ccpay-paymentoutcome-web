@@ -33,6 +33,18 @@ describe('Home page', () => {
         });
     });
 
+    test('renders English success page when payment status is lowercase success', async () => {
+      resolveGetPaymentStatusWithStatus('success');
+
+      await request(app)
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .expect((res) => {
+          expect(res.status).to.equal(200);
+          expect(res.text).to.contain('Payment successful');
+          expect(res.text).to.contain('RC-1234-1234-1343-1234');
+        });
+    });
+
     test('renders Welsh success page when language is cy', async () => {
       resolveGetPaymentStatusWithStatus('Success');
 
