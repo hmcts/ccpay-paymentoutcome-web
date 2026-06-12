@@ -15,7 +15,7 @@
     "url": "S2S_URL"
   },
   "appInsights": {
-    "instrumentationKey": "APPINSIGHTS_INSTRUMENTATIONKEY"
+    "connectionString": "APPINSIGHTS_CONNECTION_STRING"
   },
   "e2e": {
     "frontendUrl": "E2E_FRONTEND_URL",
