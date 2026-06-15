@@ -37,11 +37,11 @@ describe('Home page', () => {
       resolveGetPaymentStatusWithStatus('success');
 
       await request(app)
-        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation/0e5278ca80791bd38c0a9674d087a4a1ba14810ab913f1ffdbe34630d459daa2?language=en')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Payment successful');
-          expect(res.text).to.contain('RC-1234-1234-1343-1234');
+          expect(res.text).to.contain('RC-1763-0558-0473-0637');
         });
     });
 

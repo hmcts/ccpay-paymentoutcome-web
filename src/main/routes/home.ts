@@ -16,6 +16,10 @@ function getLanguage(urlString: any) {
   }
 }
 
+function isPaymentSuccess(status: unknown): boolean {
+  return typeof status === 'string' && status.trim().toLowerCase() === 'success';
+}
+
 export default function(app: Application): void {
 
   app.get('/payment/:id/confirmation/:rc', (req, res) => {
@@ -31,7 +35,7 @@ export default function(app: Application): void {
         .then((r: any) => {
           console.log( 'My status is: ', r.status);
           console.log( 'reference: ', uuid);
-          if(r.status == "Success") {
+          if (isPaymentSuccess(r?.status)) {
             const reference = r.reference;
             console.log( 'My reference is: ', reference);
             const hashReference = hmacSha256('toto1234!',reference);
