@@ -24,7 +24,6 @@ export class PayhubService {
     });
 
     if (!response.ok) {
-      console.error(`Failed to fetch payment status for UUID ${uuid}: ${response.statusText}`);
       throw new Error(`Failed to fetch payment status: ${response.statusText}`);
     }
     return response.json();

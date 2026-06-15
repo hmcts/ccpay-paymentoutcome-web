@@ -16,10 +16,6 @@ function getLanguage(urlString: any) {
   }
 }
 
-function isPaymentSuccess(status: unknown): boolean {
-  return typeof status === 'string' && status.trim().toLowerCase() === 'success';
-}
-
 export default function(app: Application): void {
 
   app.get('/payment/:id/confirmation/:rc', (req, res) => {
@@ -31,23 +27,10 @@ export default function(app: Application): void {
     console.log('rendering home page with result: ',render);
 
     PayhubService
-    .getPaymentStatus(uuid)
-    .then((r: any) => {
-      const language = getLanguage(req.url);
-      const render = language === "cy" ? 'home-welsh' : 'home';
-      if (isPaymentSuccess(r?.status)) {
-      res.render(render, { error: false, result: r, url: exuiUrl});
-      }
-      else {
-       res.render(render, { error: true, result: r, url: exuiUrl });
-      }
-    }).catch(()=> {
-      const language = getLanguage(req.url);
-      const render = language === "cy" ? 'home-welsh' : 'home';
-      res.render(render, { error: true, result: [], url: exuiUrl });
-    });
       .getPaymentStatus(uuid)
         .then((r: any) => {
+          console.log( 'My status is: ', r.status);
+          console.log( 'reference: ', uuid);
           if(r.status == "Success") {
             const reference = r.reference;
             console.log( 'My reference is: ', reference);
@@ -59,7 +42,6 @@ export default function(app: Application): void {
             if (compareHashes(hashReference,rc)){
               res.render(render, { error: false, result: r, url: exuiUrl});
             } else {
-              console.log('401!!!!!!!');
               return res.status(401).render(render, { error: true, result: [], url: exuiUrl });
             }
           } else {
