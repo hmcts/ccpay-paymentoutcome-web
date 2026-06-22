@@ -3,6 +3,7 @@
     "clientId": "paymentoutcome_web"
   },
   "session": {
+    "secret": "PAYBUBBLE_SESSION_SECRET",
     "cookieName": "SESSION_ID"
   },
   "payhub": {

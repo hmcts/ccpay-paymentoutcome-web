@@ -5,6 +5,7 @@ const config = require('config');
 const url = require('url');
 
 const exuiUrl =  config.get('exui.url').replace('.prod', '');
+const carPaymentSecret = config.get('session.secret');
 
 function getLanguage(urlString: any) {
   const parsedUrl = url.parse(urlString, true);
@@ -34,18 +35,21 @@ export default function(app: Application): void {
       .getPaymentStatus(uuid)
         .then((r: any) => {
           console.log( 'My status is: ', r.status);
-          console.log( 'reference: ', uuid);
+          console.log( 'My uuid reference: ', uuid);
           if (isPaymentSuccess(r?.status)) {
             const reference = r.reference;
-            console.log( 'My reference is: ', reference);
-            const hashReference = hmacSha256('toto1234!',reference);
-            console.log( 'My hash reference from response: ', hashReference);
-            console.log( 'My hash reference from url: ',rc);
+            console.log( 'My reference is RC from status: ', reference);
+            console.log('My paybubbleSessionSecret is: ',carPaymentSecret);
+            const hashReference = hmacSha256(carPaymentSecret,reference);
+            console.log( 'The hash RC reference from response: ', hashReference);
+            console.log( 'My hash RC reference from url: ',rc);
             // Compare the hash of the reference with the provided rc value passed as parameter by the consumer.
             //If they match, render the home page with the result, otherwise render the home page with an error message.
             if (compareHashes(hashReference,rc)){
+              console.log( '--------All good ---------');
               res.render(render, { error: false, result: r, url: exuiUrl});
             } else {
+              console.log( '--------MUY MAL  good ---------');
               return res.status(401).render(render, { error: true, result: [], url: exuiUrl });
             }
           } else {
