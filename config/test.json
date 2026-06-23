@@ -1,1 +1,8 @@
-{}
+{
+  "session": {
+    "secret": "test-secret"
+  },
+  "exui": {
+    "url": "http://localhost"
+  }
+}
