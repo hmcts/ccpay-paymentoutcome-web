@@ -1,6 +1,6 @@
 {
   "session": {
-    "secret": "test-secret"
+    "secret": "toto1234!"
   },
   "exui": {
     "url": "http://localhost"
