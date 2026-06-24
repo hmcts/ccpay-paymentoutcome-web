@@ -17,6 +17,15 @@ export class PropertiesVolume {
         ],
         'appInsights.connectionString',
       );
+
+    this.setFirstAvailableSecret(
+        [
+          ['secrets', 'paybubble-session-secret'],
+          ['secrets', 'ccpay', 'paybubble-session-secret'],
+          ['paybubble-session-secret']
+        ],
+        'session.secret',
+      );
     }
   }
 
