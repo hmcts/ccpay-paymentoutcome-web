@@ -34,6 +34,7 @@ export default function(app: Application): void {
     PayhubService
       .getPaymentStatus(uuid)
         .then((r: any) => {
+          console.log('current time:', new Date().toISOString());
           console.log( 'My status is: ', r.status);
           console.log( 'My uuid reference: ', uuid);
           if (isPaymentSuccess(r?.status)) {
