@@ -23,7 +23,7 @@ function isPaymentSuccess(status: unknown): boolean {
 function getSessionSecret(): string {
   try {
       if (config.get('session.secret')) {
-        return = config.get('session.secret');
+        return config.get('session.secret');
        }
     } catch (error) {
       logger.error('Application error getting session.secret', error);
