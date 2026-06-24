@@ -3,6 +3,6 @@
     "secret": "toto1234!"
   },
   "exui": {
-    "url": "http://localhost"
+    "url": "https://manage-case.demo.platform.hmcts.net/cases/case-details"
   }
 }
