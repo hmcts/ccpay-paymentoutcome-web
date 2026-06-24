@@ -26,6 +26,18 @@ new PropertiesVolume().enableFor(app);
 // Same init order as legacy AppInsights module: after secrets volume, before routes (and PayHub client load).
 const enableAppInsights = require('./app-insights/app-insights');
 enableAppInsights();
+
+function getSessionSecret(): string {
+  try {
+      if (config.get('session.secret')) {
+        return config.get('session.secret');
+       }
+    } catch (error) {
+      logger.error('Application error getting session.secret !!!!', error);
+    }
+}
+const carPaymentSecret = getSessionSecret();
+
 new Nunjucks(developmentMode).enableFor(app);
 new Helmet(config.get('security')).enableFor(app);
 

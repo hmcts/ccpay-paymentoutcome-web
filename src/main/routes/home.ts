@@ -1,10 +1,12 @@
 import { Application } from 'express';
 import { PayhubService } from '../app/payhub/payhubService';
 import { hmacSha256, compareHashes } from '../app/util/hmac';
+const { Logger } = require('@hmcts/nodejs-logging');
 const config = require('config');
 const url = require('url');
 const exuiUrl =  config.get('exui.url').replace('.prod', '');
 
+const logger = Logger.getLogger('app');
 
 function getLanguage(urlString: any) {
   const parsedUrl = url.parse(urlString, true);
@@ -26,7 +28,7 @@ function getSessionSecret(): string {
         return config.get('session.secret');
        }
     } catch (error) {
-      console.log('Application error getting session.secret !!!!', error);
+      logger.error('Application error getting session.secret !!!!', error);
     }
 }
 
