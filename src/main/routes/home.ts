@@ -39,7 +39,7 @@ export default function(app: Application): void {
     const render = language === "cy" ? 'home-welsh' : 'home';
     console.log('rendering home page with language: ',language);
     console.log('rendering home page with result: ',render);
-    carPaymentSecret = getSessionSecret();
+    const carPaymentSecret = getSessionSecret();
     PayhubService
       .getPaymentStatus(uuid)
         .then((r: any) => {
