@@ -26,7 +26,7 @@ function getSessionSecret(): string {
         return config.get('session.secret');
        }
     } catch (error) {
-      logger.error('Application error getting session.secret', error);
+      console.log('Application error getting session.secret !!!!', error);
     }
 }
 
