@@ -37,6 +37,7 @@ function getSessionSecret(): string {
     }
 }
 const carPaymentSecret = getSessionSecret();
+logger.log('the value of carPaymentSecret is ', carPaymentSecret);
 
 new Nunjucks(developmentMode).enableFor(app);
 new Helmet(config.get('security')).enableFor(app);
