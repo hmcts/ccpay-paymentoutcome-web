@@ -28,6 +28,7 @@ const enableAppInsights = require('./app-insights/app-insights');
 enableAppInsights();
 
 
+//TESTING PURPOSES ONLY - REMOVE BEFORE PRODUCTION
 function getSessionPaymentOutcomeSecret(): string {
   try {
       if (config.get('secrets.ccpay.paymentoutcome-s2s-web')) {
@@ -52,7 +53,7 @@ function getSessionSecret(): string {
 }
 const carPaymentSecret = getSessionSecret();
 logger.error('the value of carPaymentSecret is ', carPaymentSecret);
-
+//TESTING PURPOSES ONLY - REMOVE BEFORE PRODUCTION
 
 
 
