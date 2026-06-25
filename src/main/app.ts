@@ -42,17 +42,17 @@ const carPaymenOutCometSecret = getSessionPaymentOutcomeSecret();
 logger.error('The value of paymentoutcome-s2s-web is ', carPaymenOutCometSecret);
 
 
-function getSessionSecret(): string {
-  try {
-      if (config.get('session.secret')) {
-        return config.get('session.secret');
-       }
-    } catch (error) {
-      logger.error('Application error getting session.secret !!!!', error);
-    }
-}
-const carPaymentSecret = getSessionSecret();
-logger.error('the value of carPaymentSecret is ', carPaymentSecret);
+// function getSessionSecret(): string {
+//   try {
+//       if (config.get('session.secret')) {
+//         return config.get('session.secret');
+//        }
+//     } catch (error) {
+//       logger.error('Application error getting session.secret !!!!', error);
+//     }
+// }
+// const carPaymentSecret = getSessionSecret();
+// logger.error('the value of carPaymentSecret is ', carPaymentSecret);
 //TESTING PURPOSES ONLY - REMOVE BEFORE PRODUCTION
 
 

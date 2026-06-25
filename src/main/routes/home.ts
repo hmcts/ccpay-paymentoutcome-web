@@ -22,16 +22,25 @@ function isPaymentSuccess(status: unknown): boolean {
   return typeof status === 'string' && status.trim().toLowerCase() === 'success';
 }
 
-function getSessionSecret(): string {
+// function getSessionSecret(): string {
+//   try {
+//       if (config.get('session.secret')) {
+//         return config.get('session.secret');
+//        }
+//     } catch (error) {
+//       logger.error('Application error getting session.secret !!!!', error);
+//     }
+// }
+
+function getSessionPaymentOutcomeSecret(): string {
   try {
-      if (config.get('session.secret')) {
-        return config.get('session.secret');
+      if (config.get('secrets.ccpay.paymentoutcome-s2s-web')) {
+        return config.get('secrets.ccpay.paymentoutcome-s2s-web');
        }
     } catch (error) {
-      logger.error('Application error getting session.secret !!!!', error);
+      logger.error('Application error getting paymentoutcome-s2s-web !!!!', error);
     }
 }
-
 export default function(app: Application): void {
 
   app.get('/payment/:id/confirmation/:rc', (req, res) => {
@@ -41,7 +50,7 @@ export default function(app: Application): void {
     const render = language === "cy" ? 'home-welsh' : 'home';
     console.log('rendering home page with language: ',language);
     console.log('rendering home page with result: ',render);
-    const carPaymentSecret = getSessionSecret();
+    const carPaymentSecret = getSessionPaymentOutcomeSecret();
     PayhubService
       .getPaymentStatus(uuid)
         .then((r: any) => {
