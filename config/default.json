@@ -6,7 +6,7 @@
   },
   "session": {
     "cookieName": "SESSION_ID",
-    "secret": "PAYBUBBLE_SESSION_SECRET"
+    "secret": "PAYMENTOUTCOME_S2S_OTP_SECRET"
   },
   "payhub": {
     "url": "http://payment-api-prod.service.core-compute-prod.internal"
