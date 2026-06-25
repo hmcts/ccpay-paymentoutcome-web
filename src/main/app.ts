@@ -27,6 +27,20 @@ new PropertiesVolume().enableFor(app);
 const enableAppInsights = require('./app-insights/app-insights');
 enableAppInsights();
 
+
+function getSessionPaymentOutcomeSecret(): string {
+  try {
+      if (config.get('secrets.ccpay.paymentoutcome-s2s-web')) {
+        return config.get('secrets.ccpay.paymentoutcome-s2s-web');
+       }
+    } catch (error) {
+      logger.error('Application error getting paymentoutcome-s2s-web !!!!', error);
+    }
+}
+const carPaymenOutCometSecret = getSessionPaymentOutcomeSecret();
+logger.log('The value of paymentoutcome-s2s-web is ', carPaymenOutCometSecret);
+
+
 function getSessionSecret(): string {
   try {
       if (config.get('session.secret')) {
@@ -38,6 +52,10 @@ function getSessionSecret(): string {
 }
 const carPaymentSecret = getSessionSecret();
 logger.log('the value of carPaymentSecret is ', carPaymentSecret);
+
+
+
+
 
 new Nunjucks(developmentMode).enableFor(app);
 new Helmet(config.get('security')).enableFor(app);
