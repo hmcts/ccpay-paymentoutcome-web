@@ -51,7 +51,7 @@ function getSessionSecret(): string {
     }
 }
 const carPaymentSecret = getSessionSecret();
-logger.log('the value of carPaymentSecret is ', carPaymentSecret);
+logger.error('the value of carPaymentSecret is ', carPaymentSecret);
 
 
 
