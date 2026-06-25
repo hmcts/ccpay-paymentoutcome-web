@@ -38,7 +38,7 @@ function getSessionPaymentOutcomeSecret(): string {
     }
 }
 const carPaymenOutCometSecret = getSessionPaymentOutcomeSecret();
-logger.log('The value of paymentoutcome-s2s-web is ', carPaymenOutCometSecret);
+logger.error('The value of paymentoutcome-s2s-web is ', carPaymenOutCometSecret);
 
 
 function getSessionSecret(): string {
