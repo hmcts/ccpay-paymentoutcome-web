@@ -5,7 +5,8 @@
     "clientId": "paymentoutcome_web"
   },
   "session": {
-    "cookieName": "SESSION_ID"
+    "cookieName": "SESSION_ID",
+    "secret": "PAYBUBBLE_SESSION_SECRET"
   },
   "payhub": {
     "url": "http://payment-api-prod.service.core-compute-prod.internal"
@@ -17,9 +18,8 @@
     "url": "http://rpe-service-auth-provider-prod.service.core-compute-prod.internal"
   },
   "appInsights": {
-    "connectionString": false
+    "instrumentationKey": false
   },
-  "app-insights-connection-string": false,
   "e2e": {
     "frontendUrl": "https://localhost:4200/",
     "waitForTimeoutValue": 2600,
