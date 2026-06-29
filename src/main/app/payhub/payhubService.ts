@@ -1,9 +1,10 @@
 import wrappedFetch from '../../app/client/request';
+import { getSessionPaymentOutcomeSecret } from '../../app/util/propertiesUtil';
 const config = require('config');
 const otp = require('otp');
 const s2sUrl =  config.get('s2s.url');
 const payhubUrl =  config.get('payhub.url');
-const paymentoutcomeSecret = config.get('secrets.ccpay.paymentoutcome-s2s-web');
+const paymentoutcomeSecret = getSessionPaymentOutcomeSecret();
 const microService = config.get('security.clientId');
 export interface PaymentStatus {
   status: string;

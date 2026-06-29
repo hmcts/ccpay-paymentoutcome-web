@@ -12,6 +12,7 @@ import favicon from 'serve-favicon';
 import { HTTPError } from 'HttpError';
 import { Nunjucks } from './modules/nunjucks';
 import { PropertiesVolume } from './modules/properties-volume';
+import { getSessionPaymentOutcomeSecret } from './app/util/propertiesUtil';
 const { setupDev } = require('./development');
 
 const env = process.env.NODE_ENV || 'development';
@@ -22,24 +23,15 @@ app.locals.ENV = env;
 
 const logger = Logger.getLogger('app');
 
+//This is for test properties before starting the app, to ensure that the secret is available for the app to use.
+getSessionPaymentOutcomeSecret();
+
 new PropertiesVolume().enableFor(app);
 // Same init order as legacy AppInsights module: after secrets volume, before routes (and PayHub client load).
 const enableAppInsights = require('./app-insights/app-insights');
 enableAppInsights();
 
 
-//TESTING PURPOSES ONLY - REMOVE BEFORE PRODUCTION
-function getSessionPaymentOutcomeSecret(): string {
-  try {
-      if (config.get('secrets.ccpay.paymentoutcome-s2s-web')) {
-        return config.get('secrets.ccpay.paymentoutcome-s2s-web');
-       }
-    } catch (error) {
-      logger.error('Application error getting paymentoutcome-s2s-web !!!!', error);
-    }
-}
-const carPaymenOutCometSecret = getSessionPaymentOutcomeSecret();
-logger.error('The value of paymentoutcome-s2s-web is ', carPaymenOutCometSecret);
 
 
 
