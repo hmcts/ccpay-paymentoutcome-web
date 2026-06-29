@@ -22,16 +22,6 @@ function isPaymentSuccess(status: unknown): boolean {
   return typeof status === 'string' && status.trim().toLowerCase() === 'success';
 }
 
-// function getSessionSecret(): string {
-//   try {
-//       if (config.get('session.secret')) {
-//         return config.get('session.secret');
-//        }
-//     } catch (error) {
-//       logger.error('Application error getting session.secret !!!!', error);
-//     }
-// }
-
 function getSessionPaymentOutcomeSecret(): string {
   try {
       if (config.get('secrets.ccpay.paymentoutcome-s2s-web')) {

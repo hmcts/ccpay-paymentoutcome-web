@@ -3,7 +3,6 @@
     "clientId": "paymentoutcome_web"
   },
   "session": {
-    "secret": "PAYMENTOUTCOME_S2S_OTP_SECRET",
     "cookieName": "SESSION_ID"
   },
   "payhub": {
