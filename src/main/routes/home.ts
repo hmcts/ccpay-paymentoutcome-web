@@ -28,7 +28,7 @@ function getSessionPaymentOutcomeSecret(): string {
         return config.get('secrets.ccpay.paymentoutcome-s2s-web');
        }
     } catch (error) {
-      logger.error('Application error getting paymentoutcome-s2s-web !!!!', error);
+      logger.error('Application error getting paymentoutcome-s2s-web.', error);
     }
 }
 export default function(app: Application): void {
