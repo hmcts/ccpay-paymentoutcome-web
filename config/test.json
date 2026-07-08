@@ -1,1 +1,10 @@
-{}
+{
+  "secrets": {
+    "ccpay": {
+      "paymentoutcome-s2s-web": "toto1234!"
+    }
+  },
+  "exui": {
+    "url": "https://manage-case.demo.platform.hmcts.net/cases/case-details"
+  }
+}

@@ -8,7 +8,7 @@ const s2sUrl: string = config.get<string>('s2s.url')
 function validFeeWithStatus (status: string) {
   return {
     status: status,
-    reference: 'RC-1234-1234-1343-1234',
+    reference: 'RC-1763-0558-0473-0637',
     ccd_case_number: '1234123412341234'
   }
 }
