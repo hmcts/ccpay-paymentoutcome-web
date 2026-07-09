@@ -12,6 +12,6 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverage: true,
   coverageDirectory: 'coverage/routes',
-  collectCoverageFrom: ['src/main/**/*.ts'],
+  collectCoverageFrom: ['src/main/routes/**/*.ts'],
   coverageReporters: ['lcov', 'text'],
 }
