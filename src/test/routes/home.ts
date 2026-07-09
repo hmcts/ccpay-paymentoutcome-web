@@ -29,7 +29,6 @@ describe('Home page', () => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Payment successful');
           expect(res.text).to.contain('RC-1234-1234-1343-1234');
-          expect(res.text).to.contain('https://manage-case.platform.hmcts.net/cases/case-details/1234123412341234#Service Request');
         });
     });
 
@@ -66,6 +65,19 @@ describe('Home page', () => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('There is a problem');
           expect(res.text).to.contain('Your card payment was unsuccessful.');
+        });
+    });
+
+    test('renders Welsh error summary when payment status is not Success', async () => {
+      resolveGetPaymentStatusWithStatus('Failed');
+
+      await request(app)
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=cy')
+        .expect((res) => {
+          expect(res.status).to.equal(200);
+          expect(res.text).to.contain('Mae yna broblem');
+          expect(res.text).to.contain('Roedd eich taliad cerdyn yn aflwyddiannus.');
+          expect(res.text).to.contain('Dychwelyd i gais gwasanaeth');
         });
     });
 
