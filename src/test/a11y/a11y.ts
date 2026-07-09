@@ -51,9 +51,16 @@ function ensurePageCallWillSucceed(url: string): Promise<void> {
   });
 }
 
-function runPally(url: string): Pa11yResult {
+function runPally(url: string): Promise<Pa11yResult> {
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  const chromeLaunchConfig = {
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    ...(executablePath ? { executablePath } : {}),
+  };
+
   return pa11y(url, {
     hideElements: '.govuk-footer__licence-logo, .govuk-header__logotype-crown',
+    chromeLaunchConfig,
   });
 }
 
