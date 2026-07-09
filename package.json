@@ -14,7 +14,7 @@
     "test": "NODE_OPTIONS=--openssl-legacy-provider jest",
     "test:coverage": "NODE_OPTIONS=--openssl-legacy-provider jest --coverage",
     "test:routes": "NODE_OPTIONS=--openssl-legacy-provider jest -c jest.routes.config.js",
-    "test:a11y": "NODE_OPTIONS=--openssl-legacy-provider jest -c jest.a11y.config.js --maxWorkers 15",
+    "test:a11y": "NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=test jest -c jest.a11y.config.js --maxWorkers 15",
     "sonar-scan": "NODE_OPTIONS=--openssl-legacy-provider  sonar-scanner",
     "test:smoke": "NODE_OPTIONS=--openssl-legacy-provider  NODE_TLS_REJECT_UNAUTHORIZED=0 && jest -c jest.smoke.config.js",
     "test:functional": "NODE_OPTIONS=--openssl-legacy-provider NODE_TLS_REJECT_UNAUTHORIZED=0 && jest -c jest.smoke.config.js",

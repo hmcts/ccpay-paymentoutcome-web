@@ -1,10 +1,14 @@
 import { fail } from 'assert';
+import type { AddressInfo } from 'net';
+import type { Server } from 'http';
 
 const pa11y = require('pa11y');
 import * as supertest from 'supertest';
 import { app } from '../../main/app';
 
-const agent = supertest.agent(app);
+let server: Server;
+let baseUrl: string;
+let agent: supertest.SuperAgentTest;
 
 class Pa11yResult {
   documentTitle: string;
@@ -21,8 +25,17 @@ class PallyIssue {
   typeCode: number;
 }
 
-beforeAll((done /* call it or remove it*/) => {
-  done(); // calling it
+beforeAll(done => {
+  server = app.listen(0, () => {
+    const address = server.address() as AddressInfo;
+    baseUrl = `http://127.0.0.1:${address.port}`;
+    agent = supertest.agent(baseUrl);
+    done();
+  });
+});
+
+afterAll(done => {
+  server.close(done);
 });
 
 function ensurePageCallWillSucceed(url: string): Promise<void> {
@@ -58,7 +71,7 @@ function testAccessibility(url: string): void {
     test('should have no accessibility errors', done => {
       console.log(`Checking accessibility for page: ${url}`);
       ensurePageCallWillSucceed(url)
-        .then(() => runPally(agent.get(url).url))
+        .then(() => runPally(`${baseUrl}${url}`))
         .then((result: Pa11yResult) => {
           expectNoErrors(result.issues);
           done();
