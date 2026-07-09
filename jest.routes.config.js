@@ -10,4 +10,8 @@ module.exports = {
     '^.+\\.ts?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  collectCoverage: true,
+  coverageDirectory: 'coverage/routes',
+  collectCoverageFrom: ['src/main/**/*.ts'],
+  coverageReporters: ['lcov', 'text'],
 }
