@@ -1,6 +1,6 @@
 #!groovy
 
-@Library("Infrastructure")
+@Library("Infrastructure@2.5.1")
 
 def yarnBuilder = new uk.gov.hmcts.contino.YarnBuilder(this)
 
