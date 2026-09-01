@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import './app-insights/bootstrap';
 const { Logger } = require('@hmcts/nodejs-logging');
 import { app } from './app';
 
