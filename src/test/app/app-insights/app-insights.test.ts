@@ -88,7 +88,7 @@ describe('app insights bootstrap', () => {
     expect(mocks.setup).toHaveBeenCalledWith('InstrumentationKey=test-key;IngestionEndpoint=https://test/');
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
-    expect(mocks.tags.cloudRole).toBe('rpe-expressjs-template');
+    expect(mocks.tags.cloudRole).toBe('ccpay-paymentoutcome-web');
     expect(mocks.trackTrace).toHaveBeenCalledWith({ message: 'App insights activated' });
   });
 

@@ -12,7 +12,7 @@ function enableAppInsights(): void {
             .setSendLiveMetrics(true)
             .start();
 
-          appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = 'rpe-expressjs-template';
+          appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = 'ccpay-paymentoutcome-web';
           appInsights.defaultClient.trackTrace({message: 'App insights activated'});
           logger.info('Application Insights enabled');
      }

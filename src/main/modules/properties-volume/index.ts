@@ -6,7 +6,11 @@ import { get, set } from 'lodash';
 export class PropertiesVolume {
 
   enableFor(server: Application): void {
-    if (server.locals.ENV !== 'development') {
+    this.setupSecrets(server.locals.ENV);
+  }
+
+  setupSecrets(environment: string): void {
+    if (environment !== 'development') {
       propertiesVolume.addTo(config);
 
       this.setFirstAvailableSecret(
