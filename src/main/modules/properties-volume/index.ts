@@ -1,19 +1,23 @@
 import config from 'config';
 import * as propertiesVolume from '@hmcts/properties-volume';
-import { Application } from 'express';
+import type { Application } from 'express';
 import { get, set } from 'lodash';
 
 export class PropertiesVolume {
 
   enableFor(server: Application): void {
-    if (server.locals.ENV !== 'development') {
+    this.enableForEnv(server.locals.ENV);
+  }
+
+  enableForEnv(env: string): void {
+    if (env !== 'development') {
       propertiesVolume.addTo(config);
 
       this.setFirstAvailableSecret(
         [
           ['secrets', 'app-insights-connection-string'],
           ['secrets', 'ccpay', 'app-insights-connection-string'],
-          ['app-insights-connection-string']
+          ['app-insights-connection-string'],
         ],
         'appInsights.connectionString',
       );

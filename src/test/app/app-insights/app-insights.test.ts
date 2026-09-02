@@ -1,5 +1,7 @@
 type AppInsightsMock = {
   setup: jest.Mock;
+  setAutoDependencyCorrelation: jest.Mock;
+  setAutoCollectConsole: jest.Mock;
   setSendLiveMetrics: jest.Mock;
   start: jest.Mock;
   trackTrace: jest.Mock;
@@ -9,16 +11,20 @@ type AppInsightsMock = {
 const createMocks = (): AppInsightsMock => {
   const start = jest.fn();
   const setSendLiveMetrics = jest.fn().mockReturnValue({ start });
-  const setup = jest.fn().mockReturnValue({ setSendLiveMetrics });
+  const setAutoCollectConsole = jest.fn().mockReturnValue({ setSendLiveMetrics });
+  const setAutoDependencyCorrelation = jest.fn().mockReturnValue({ setAutoCollectConsole });
+  const setup = jest.fn().mockReturnValue({ setAutoDependencyCorrelation });
   const trackTrace = jest.fn();
   const tags: Record<string, string> = {};
 
   return {
     setup,
+    setAutoDependencyCorrelation,
+    setAutoCollectConsole,
     setSendLiveMetrics,
     start,
     trackTrace,
-    tags
+    tags,
   };
 };
 
@@ -32,22 +38,22 @@ describe('app insights bootstrap', () => {
     const mocks = createMocks();
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue(false)
+      get: jest.fn().mockReturnValue(false),
     }));
     jest.doMock('applicationinsights', () => ({
       setup: mocks.setup,
       defaultClient: {
         context: {
           tags: mocks.tags,
-          keys: { cloudRole: 'cloudRole' }
+          keys: { cloudRole: 'cloudRole' },
         },
-        trackTrace: mocks.trackTrace
-      }
+        trackTrace: mocks.trackTrace,
+      },
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
-      }
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() }),
+      },
     }));
 
     jest.isolateModules(() => {
@@ -62,22 +68,22 @@ describe('app insights bootstrap', () => {
     const mocks = createMocks();
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
+      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/'),
     }));
     jest.doMock('applicationinsights', () => ({
       setup: mocks.setup,
       defaultClient: {
         context: {
           tags: mocks.tags,
-          keys: { cloudRole: 'cloudRole' }
+          keys: { cloudRole: 'cloudRole' },
         },
-        trackTrace: mocks.trackTrace
-      }
+        trackTrace: mocks.trackTrace,
+      },
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
-      }
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() }),
+      },
     }));
 
     jest.isolateModules(() => {
@@ -86,9 +92,11 @@ describe('app insights bootstrap', () => {
     });
 
     expect(mocks.setup).toHaveBeenCalledWith('InstrumentationKey=test-key;IngestionEndpoint=https://test/');
+    expect(mocks.setAutoDependencyCorrelation).toHaveBeenCalledWith(true);
+    expect(mocks.setAutoCollectConsole).toHaveBeenCalledWith(true, true);
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
-    expect(mocks.tags.cloudRole).toBe('rpe-expressjs-template');
+    expect(mocks.tags.cloudRole).toBe('ccpay-paymentoutcome-web');
     expect(mocks.trackTrace).toHaveBeenCalledWith({ message: 'App insights activated' });
   });
 
@@ -99,15 +107,15 @@ describe('app insights bootstrap', () => {
     });
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
+      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/'),
     }));
     jest.doMock('applicationinsights', () => ({
-      setup: setupMock
+      setup: setupMock,
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: warnMock })
-      }
+        getLogger: () => ({ info: jest.fn(), warn: warnMock }),
+      },
     }));
 
     jest.isolateModules(() => {
