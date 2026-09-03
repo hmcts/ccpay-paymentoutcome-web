@@ -1,5 +1,7 @@
 type AppInsightsMock = {
   setup: jest.Mock;
+  setAutoDependencyCorrelation: jest.Mock;
+  setAutoCollectConsole: jest.Mock;
   setSendLiveMetrics: jest.Mock;
   start: jest.Mock;
   trackTrace: jest.Mock;
@@ -9,12 +11,16 @@ type AppInsightsMock = {
 const createMocks = (): AppInsightsMock => {
   const start = jest.fn();
   const setSendLiveMetrics = jest.fn().mockReturnValue({ start });
-  const setup = jest.fn().mockReturnValue({ setSendLiveMetrics });
+  const setAutoCollectConsole = jest.fn().mockReturnValue({ setSendLiveMetrics });
+  const setAutoDependencyCorrelation = jest.fn().mockReturnValue({ setAutoCollectConsole });
+  const setup = jest.fn().mockReturnValue({ setAutoDependencyCorrelation });
   const trackTrace = jest.fn();
   const tags: Record<string, string> = {};
 
   return {
     setup,
+    setAutoDependencyCorrelation,
+    setAutoCollectConsole,
     setSendLiveMetrics,
     start,
     trackTrace,
@@ -86,9 +92,11 @@ describe('app insights bootstrap', () => {
     });
 
     expect(mocks.setup).toHaveBeenCalledWith('InstrumentationKey=test-key;IngestionEndpoint=https://test/');
+    expect(mocks.setAutoDependencyCorrelation).toHaveBeenCalledWith(true);
+    expect(mocks.setAutoCollectConsole).toHaveBeenCalledWith(true, true);
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
-    expect(mocks.tags.cloudRole).toBe('rpe-expressjs-template');
+    expect(mocks.tags.cloudRole).toBe('ccpay-paymentoutcome-web');
     expect(mocks.trackTrace).toHaveBeenCalledWith({ message: 'App insights activated' });
   });
 
