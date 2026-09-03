@@ -1,35 +1,19 @@
 import config from 'config';
 import * as propertiesVolume from '@hmcts/properties-volume';
-import type { Application } from 'express';
 import { get, set } from 'lodash';
 
-export class PropertiesVolume {
+const appInsightsConnectionStringPath = 'secrets.ccpay.app-insights-connection-string';
+const appInsightsConnectionStringConfigPath = 'appInsights.connectionString';
 
-  enableFor(server: Application): void {
-    this.enableForEnv(server.locals.ENV);
-  }
+export class PropertiesVolume {
 
   enableForEnv(env: string): void {
     if (env !== 'development') {
       propertiesVolume.addTo(config);
 
-      this.setFirstAvailableSecret(
-        [
-          ['secrets', 'app-insights-connection-string'],
-          ['secrets', 'ccpay', 'app-insights-connection-string'],
-          ['app-insights-connection-string'],
-        ],
-        'appInsights.connectionString',
-      );
-    }
-  }
-
-  private setFirstAvailableSecret(fromPaths: string[][], toPath: string): void {
-    for (const fromPath of fromPaths) {
-      const value = get(config, fromPath);
-      if (typeof value === 'string' && value.trim() !== '') {
-        set(config, toPath, value);
-        return;
+      const appInsightsConnectionString = get(config as any, appInsightsConnectionStringPath);
+      if (typeof appInsightsConnectionString === 'string' && appInsightsConnectionString.trim() !== '') {
+        set(config, appInsightsConnectionStringConfigPath, appInsightsConnectionString);
       }
     }
   }

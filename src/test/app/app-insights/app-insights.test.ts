@@ -24,7 +24,7 @@ const createMocks = (): AppInsightsMock => {
     setSendLiveMetrics,
     start,
     trackTrace,
-    tags,
+    tags
   };
 };
 
@@ -38,22 +38,22 @@ describe('app insights bootstrap', () => {
     const mocks = createMocks();
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue(false),
+      get: jest.fn().mockReturnValue(false)
     }));
     jest.doMock('applicationinsights', () => ({
       setup: mocks.setup,
       defaultClient: {
         context: {
           tags: mocks.tags,
-          keys: { cloudRole: 'cloudRole' },
+          keys: { cloudRole: 'cloudRole' }
         },
-        trackTrace: mocks.trackTrace,
-      },
+        trackTrace: mocks.trackTrace
+      }
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: jest.fn() }),
-      },
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
     }));
 
     jest.isolateModules(() => {
@@ -68,22 +68,22 @@ describe('app insights bootstrap', () => {
     const mocks = createMocks();
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/'),
+      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
     }));
     jest.doMock('applicationinsights', () => ({
       setup: mocks.setup,
       defaultClient: {
         context: {
           tags: mocks.tags,
-          keys: { cloudRole: 'cloudRole' },
+          keys: { cloudRole: 'cloudRole' }
         },
-        trackTrace: mocks.trackTrace,
-      },
+        trackTrace: mocks.trackTrace
+      }
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: jest.fn() }),
-      },
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
     }));
 
     jest.isolateModules(() => {
@@ -107,15 +107,15 @@ describe('app insights bootstrap', () => {
     });
 
     jest.doMock('config', () => ({
-      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/'),
+      get: jest.fn().mockReturnValue('InstrumentationKey=test-key;IngestionEndpoint=https://test/')
     }));
     jest.doMock('applicationinsights', () => ({
-      setup: setupMock,
+      setup: setupMock
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: warnMock }),
-      },
+        getLogger: () => ({ info: jest.fn(), warn: warnMock })
+      }
     }));
 
     jest.isolateModules(() => {
