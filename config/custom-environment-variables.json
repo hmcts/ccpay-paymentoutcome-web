@@ -14,9 +14,6 @@
   "s2s": {
     "url": "S2S_URL"
   },
-  "appInsights": {
-    "connectionString": "APPINSIGHTS_CONNECTION_STRING"
-  },
   "e2e": {
     "frontendUrl": "E2E_FRONTEND_URL",
     "waitForTimeoutValue": "E2E_WAIT_FOR_TIMEOUT_VALUE",
@@ -24,7 +21,8 @@
   },
   "secrets": {
     "ccpay": {
-      "paymentoutcome-s2s-web": "PAYMENTOUTCOME_S2S_OTP_SECRET"
+      "paymentoutcome-s2s-web": "PAYMENTOUTCOME_S2S_OTP_SECRET",
+      "app-insights-connection-string": "APPINSIGHTS_CONNECTION_STRING"
     }
   }
 }
