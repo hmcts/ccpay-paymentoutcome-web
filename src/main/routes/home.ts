@@ -59,4 +59,24 @@ export default function(app: Application): void {
             res.render(render, { error: true, result: [], url: exuiUrl });
         });
   });
+
+  app.get('/payment/:id/confirmation', (req, res) => {
+    const uuid = req.params.id;
+    PayhubService
+      .getPaymentStatus(uuid)
+      .then((r: any) => {
+        const language = getLanguage(req.url);
+        const render = language === "cy" ? 'home-welsh' : 'home';
+        if(r.status == "Success") {
+          res.render(render, { error: false, result: r, url: exuiUrl});
+        }
+        else {
+          res.render(render, { error: true, result: r, url: exuiUrl });
+        }
+      }).catch(()=> {
+      const language = getLanguage(req.url);
+      const render = language === "cy" ? 'home-welsh' : 'home';
+      res.render(render, { error: true, result: [], url: exuiUrl });
+    });
+  });
 }
