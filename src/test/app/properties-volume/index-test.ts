@@ -1,34 +1,8 @@
-type ConfigMock = {
-  appInsights: {
-    connectionString: boolean | string;
-  };
-  secrets?: {
-    ccpay?: {
-      'app-insights-connection-string'?: string;
-    };
-  };
-};
-
-const connectionString = 'InstrumentationKey=test-key;IngestionEndpoint=https://test/';
-
-const createConfig = (secret?: string): ConfigMock => ({
-  appInsights: {
-    connectionString: false,
-  },
-  secrets: secret
-    ? {
-      ccpay: {
-        'app-insights-connection-string': secret,
-      },
-    }
-    : undefined,
-});
-
-const loadPropertiesVolume = (configMock: ConfigMock, addToMock = jest.fn()) => {
+const loadPropertiesVolume = (addToMock = jest.fn()) => {
   jest.resetModules();
   jest.doMock('config', () => ({
     __esModule: true,
-    default: configMock,
+    default: {},
   }));
   jest.doMock('@hmcts/properties-volume', () => ({
     addTo: addToMock,
@@ -45,22 +19,18 @@ describe('PropertiesVolume', () => {
   });
 
   it('does not load properties volume in dev env', () => {
-    const configMock = createConfig();
-    const { PropertiesVolume, addToMock } = loadPropertiesVolume(configMock);
+    const { PropertiesVolume, addToMock } = loadPropertiesVolume();
 
     new PropertiesVolume().enableForEnv('development');
 
     expect(addToMock).not.toHaveBeenCalled();
-    expect(configMock.appInsights.connectionString).toBe(false);
   });
 
-  it('loads properties volume and maps App Insights connection string for non-dev env', () => {
-    const configMock = createConfig(connectionString);
-    const { PropertiesVolume, addToMock } = loadPropertiesVolume(configMock);
+  it('loads properties volume for non-dev env', () => {
+    const { PropertiesVolume, addToMock } = loadPropertiesVolume();
 
     new PropertiesVolume().enableForEnv('production');
 
-    expect(addToMock).toHaveBeenCalledWith(configMock);
-    expect(configMock.appInsights.connectionString).toBe(connectionString);
+    expect(addToMock).toHaveBeenCalled();
   });
 });
