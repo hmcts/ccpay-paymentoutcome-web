@@ -34,11 +34,14 @@ const mockConfig = (value: unknown) => ({
   get: jest.fn().mockReturnValue(value)
 });
 
-const loadAppInsights = () => {
+const loadAppInsights = (addTelemetryProcessorMock?: jest.Mock) => {
   jest.isolateModules(() => {
     const enableAppInsights = require('../../../main/app-insights/app-insights');
     enableAppInsights();
   });
+  return addTelemetryProcessorMock && addTelemetryProcessorMock.mock.calls[0]
+    ? addTelemetryProcessorMock.mock.calls[0][0]
+    : undefined;
 };
 
 describe('app insights bootstrap', () => {
@@ -130,5 +133,110 @@ describe('app insights bootstrap', () => {
     loadAppInsights();
 
     expect(warnMock).toHaveBeenCalled();
+  });
+});
+
+describe('fineGrainedSampling telemetry processor', () => {
+  let processor: (envelope: any) => boolean;
+
+  beforeEach(() => {
+    const addTelemetryProcessor = jest.fn();
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: jest.fn().mockReturnValue({
+        setAutoDependencyCorrelation: jest.fn().mockReturnValue({
+          setAutoCollectConsole: jest.fn().mockReturnValue({
+            setSendLiveMetrics: jest.fn().mockReturnValue({ start: jest.fn() })
+          })
+        })
+      }),
+      start: jest.fn(),
+      defaultClient: {
+        context: {
+          tags: {},
+          keys: { cloudRole: 'cloudRole' }
+        },
+        addTelemetryProcessor
+      }
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    processor = loadAppInsights(addTelemetryProcessor) as (envelope: any) => boolean;
+  });
+
+  afterEach(() => {
+    jest.resetModules();
+    jest.clearAllMocks();
+  });
+
+  it.each([
+    ['GET /health', 'RequestData'],
+    ['GET /health/liveness', 'RequestData'],
+    ['GET /health/readiness', 'RequestData'],
+    ['dependency to /health', 'RemoteDependencyData']
+  ])('keeps health telemetry at 100%% sampling for %s (%s)', (_name, baseType) => {
+    const envelope: any = {
+      data: {
+        baseType,
+        baseData: { name: 'GET /health' }
+      }
+    };
+
+    const result = processor(envelope);
+
+    expect(result).toBe(true);
+    expect(envelope.sampleRate).toBe(1);
+  });
+
+  it('does not set sampleRate for non-health request telemetry', () => {
+    const envelope: any = {
+      data: {
+        baseType: 'RequestData',
+        baseData: { name: 'GET /payment/123/confirmation' }
+      }
+    };
+
+    const result = processor(envelope);
+
+    expect(result).toBe(true);
+    expect(envelope.sampleRate).toBeUndefined();
+  });
+
+  it('does not set sampleRate for non-request/dependency telemetry', () => {
+    const envelope: any = {
+      data: {
+        baseType: 'EventData',
+        baseData: { name: 'some event' }
+      }
+    };
+
+    const result = processor(envelope);
+
+    expect(result).toBe(true);
+    expect(envelope.sampleRate).toBeUndefined();
+  });
+
+  it('does not set sampleRate when name is not a string', () => {
+    const envelope: any = {
+      data: {
+        baseType: 'RequestData',
+        baseData: { name: undefined }
+      }
+    };
+
+    const result = processor(envelope);
+
+    expect(result).toBe(true);
+    expect((envelope as any).sampleRate).toBeUndefined();
+  });
+
+  it('returns true and does not throw when envelope is missing data', () => {
+    const result = processor({});
+
+    expect(result).toBe(true);
   });
 });
