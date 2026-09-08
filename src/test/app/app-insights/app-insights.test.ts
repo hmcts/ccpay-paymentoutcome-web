@@ -60,7 +60,7 @@ const mockOtelDiagApi = () => {
   jest.doMock('@opentelemetry/api', () => ({
     diag: { setLogger },
     DiagConsoleLogger: class {},
-    DiagLogLevel: { INFO: 1 }
+    DiagLogLevel: { VERBOSE: 4 }
   }));
   return setLogger;
 };

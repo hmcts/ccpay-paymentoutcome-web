@@ -36,7 +36,7 @@ function enableAppInsights(): void {
     logConnectionStringDetails(connectionString);
 
     const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
-    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
+    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.VERBOSE);
 
     // App Insights 3.x uses OpenTelemetry resource/service.name for cloud role mapping.
     process.env.OTEL_SERVICE_NAME = CLOUD_ROLE_NAME;
