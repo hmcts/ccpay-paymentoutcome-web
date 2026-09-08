@@ -38,6 +38,33 @@ const loadAppInsights = () => {
   });
 };
 
+const appInsightsModuleMock = (appDefaultClient?: unknown) => {
+  const start = jest.fn();
+  const setup = jest.fn().mockReturnValue({
+    setAutoDependencyCorrelation: jest.fn().mockReturnValue({
+      setAutoCollectConsole: jest.fn().mockReturnValue({
+        setSendLiveMetrics: jest.fn().mockReturnValue({ start })
+      })
+    })
+  });
+
+  return {
+    setup,
+    start,
+    defaultClient: appDefaultClient
+  };
+};
+
+const mockOtelDiagApi = () => {
+  const setLogger = jest.fn();
+  jest.doMock('@opentelemetry/api', () => ({
+    diag: { setLogger },
+    DiagConsoleLogger: class {},
+    DiagLogLevel: { INFO: 1 }
+  }));
+  return setLogger;
+};
+
 describe('app insights bootstrap', () => {
   afterEach(() => {
     jest.resetModules();
@@ -124,5 +151,80 @@ describe('app insights bootstrap', () => {
     loadAppInsights();
 
     expect(warnMock).toHaveBeenCalled();
+  });
+});
+
+describe('app insights diagnostics (AI_DIAG=1)', () => {
+  afterEach(() => {
+    delete process.env.AI_DIAG;
+    jest.resetModules();
+    jest.clearAllMocks();
+  });
+
+  it('enables the otel diag logger, logs connection string endpoints and sends a canary', () => {
+    const logger = { info: jest.fn(), warn: jest.fn() };
+    const trackTrace = jest.fn();
+    const diagSetLogger = mockOtelDiagApi();
+
+    process.env.AI_DIAG = '1';
+    jest.doMock('config', () => mockConfig(
+      'InstrumentationKey=test-key;IngestionEndpoint=https://ingest.test/;LiveEndpoint=https://live.test/'));
+    jest.doMock('applicationinsights', () => appInsightsModuleMock({
+      context: { tags: {}, keys: { cloudRole: 'cloudRole' } },
+      trackTrace
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: { getLogger: () => logger }
+    }));
+
+    loadAppInsights();
+
+    expect(diagSetLogger).toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith('[ai-diag] InstrumentationKey=%s...', 'test-key');
+    expect(logger.info).toHaveBeenCalledWith('[ai-diag] IngestionEndpoint=%s', 'https://ingest.test/');
+    expect(logger.info).toHaveBeenCalledWith('[ai-diag] LiveEndpoint=%s', 'https://live.test/');
+    expect(trackTrace).toHaveBeenCalledWith({ message: 'ai-startup-canary' });
+  });
+
+  it('logs default endpoint fallbacks when the connection string has no endpoints', () => {
+    const logger = { info: jest.fn(), warn: jest.fn() };
+    mockOtelDiagApi();
+
+    process.env.AI_DIAG = '1';
+    jest.doMock('config', () => mockConfig('InstrumentationKey=test-key'));
+    jest.doMock('applicationinsights', () => appInsightsModuleMock());
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: { getLogger: () => logger }
+    }));
+
+    loadAppInsights();
+
+    expect(logger.info).toHaveBeenCalledWith('[ai-diag] IngestionEndpoint=%s',
+      'none (default https://dc.services.visualstudio.com)');
+    expect(logger.info).toHaveBeenCalledWith('[ai-diag] LiveEndpoint=%s',
+      'none (default https://rt.services.visualstudio.com)');
+  });
+
+  it.each([
+    ['missing defaultClient', undefined],
+    ['no context', {}],
+    ['no tags', { context: {} }],
+    ['no keys', { context: { tags: {} } }],
+    ['no cloudRole', { context: { tags: {}, keys: {} } }],
+    ['empty cloudRole', { context: { tags: {}, keys: { cloudRole: '' } } }]
+  ])('handles %s without throwing', (_label, appDefaultClient) => {
+    const logger = { info: jest.fn(), warn: jest.fn() };
+    mockOtelDiagApi();
+
+    process.env.AI_DIAG = '1';
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => appInsightsModuleMock(appDefaultClient));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: { getLogger: () => logger }
+    }));
+
+    loadAppInsights();
+
+    expect(logger.info).toHaveBeenCalledWith('Application Insights enabled');
   });
 });

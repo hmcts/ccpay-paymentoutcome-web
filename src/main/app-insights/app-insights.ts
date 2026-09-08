@@ -18,7 +18,7 @@ function logConnectionStringDetails(connectionString: string): void {
     acc[key] = rest.join('=');
     return acc;
   }, {});
-  logger.info('[ai-diag] InstrumentationKey=%s...', (parts['InstrumentationKey'] || '').slice(0, 8));
+  logger.info('[ai-diag] InstrumentationKey=%s...', parts['InstrumentationKey'].slice(0, 8));
   logger.info('[ai-diag] IngestionEndpoint=%s',
     parts['IngestionEndpoint'] || 'none (default https://dc.services.visualstudio.com)');
   logger.info('[ai-diag] LiveEndpoint=%s',
