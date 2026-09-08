@@ -124,13 +124,13 @@ describe('app insights bootstrap', () => {
 
     loadAppInsights();
 
-    expect(mocks.setup).toHaveBeenCalledWith(connectionString);
+    expect(mocks.setup).toHaveBeenCalledWith();
     expect(mocks.setAutoDependencyCorrelation).toHaveBeenCalledWith(true);
     expect(mocks.setAutoCollectConsole).toHaveBeenCalledWith(true, true);
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
-    expect(mocks.tags.cloudRole).toBe('ccpay-paymentoutcome-web');
     expect(process.env.OTEL_SERVICE_NAME).toBe('ccpay-paymentoutcome-web');
+    expect(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING).toBe(connectionString);
   });
 
   it('logs a warning and continues if setup throws', () => {
@@ -161,7 +161,7 @@ describe('app insights startup diagnostics', () => {
     jest.clearAllMocks();
   });
 
-  it('enables the otel diag logger, logs connection string endpoints and sends a canary', () => {
+  it('enables the otel diag logger and sends a canary', () => {
     const logger = { info: jest.fn(), warn: jest.fn() };
     const trackTrace = jest.fn();
     const diagSetLogger = mockOtelDiagApi();
@@ -178,29 +178,68 @@ describe('app insights startup diagnostics', () => {
 
     loadAppInsights();
 
-    expect(diagSetLogger).toHaveBeenCalled();
-    expect(logger.info).toHaveBeenCalledWith('[ai-diag] InstrumentationKey=%s...', 'test-key');
-    expect(logger.info).toHaveBeenCalledWith('[ai-diag] IngestionEndpoint=%s', 'https://ingest.test/');
-    expect(logger.info).toHaveBeenCalledWith('[ai-diag] LiveEndpoint=%s', 'https://live.test/');
+    expect(diagSetLogger).toHaveBeenCalledTimes(1);
+    expect(diagSetLogger.mock.calls[0][1]).toBe(4);
+    expect(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
+      .toBe('InstrumentationKey=test-key;IngestionEndpoint=https://ingest.test/;LiveEndpoint=https://live.test/');
     expect(trackTrace).toHaveBeenCalledWith({ message: 'ai-startup-canary' });
   });
 
-  it('logs default endpoint fallbacks when the connection string has no endpoints', () => {
+  it('forces a flush and logs the export result', async () => {
     const logger = { info: jest.fn(), warn: jest.fn() };
+    const flushCallback = jest.fn().mockResolvedValue({ statusCode: 200 });
     mockOtelDiagApi();
 
-    jest.doMock('config', () => mockConfig('InstrumentationKey=test-key'));
-    jest.doMock('applicationinsights', () => appInsightsModuleMock());
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => appInsightsModuleMock({
+      context: { tags: {}, keys: { cloudRole: 'cloudRole' } },
+      flush: flushCallback
+    }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: { getLogger: () => logger }
     }));
 
     loadAppInsights();
 
-    expect(logger.info).toHaveBeenCalledWith('[ai-diag] IngestionEndpoint=%s',
-      'none (default https://dc.services.visualstudio.com)');
-    expect(logger.info).toHaveBeenCalledWith('[ai-diag] LiveEndpoint=%s',
-      'none (default https://rt.services.visualstudio.com)');
+    expect(flushCallback).toHaveBeenCalledTimes(1);
+    await flushCallback();
+    await Promise.resolve();
+    expect(logger.info).toHaveBeenCalledWith('[ai-diag] flush completed: %o', { statusCode: 200 });
+  });
+
+  it('logs a warning when flush rejects', async () => {
+    const logger = { info: jest.fn(), warn: jest.fn() };
+    const flushCallback = jest.fn().mockRejectedValue(new Error('export timeout'));
+    mockOtelDiagApi();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => appInsightsModuleMock({
+      context: { tags: {}, keys: { cloudRole: 'cloudRole' } },
+      flush: flushCallback
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: { getLogger: () => logger }
+    }));
+
+    loadAppInsights();
+
+    await flushCallback().catch((_err: Error): undefined => undefined);
+    await Promise.resolve();
+    expect(logger.warn).toHaveBeenCalledWith('[ai-diag] flush failed: %s', 'export timeout');
+  });
+
+  it('exposes the raw connection string via environment variable', () => {
+    mockOtelDiagApi();
+
+    jest.doMock('config', () => mockConfig('InstrumentationKey=test-key'));
+    jest.doMock('applicationinsights', () => appInsightsModuleMock());
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: { getLogger: () => ({ info: jest.fn(), warn: jest.fn() }) }
+    }));
+
+    loadAppInsights();
+
+    expect(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING).toBe('InstrumentationKey=test-key');
   });
 
   it.each([
