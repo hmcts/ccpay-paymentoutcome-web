@@ -4,6 +4,7 @@ const { Logger } = require('@hmcts/nodejs-logging');
 const logger = Logger.getLogger('app-insights');
 const CLOUD_ROLE_NAME = 'ccpay-paymentoutcome-web';
 const EMPTY_CONNECTION_STRING = 'InstrumentationKey=00000000-0000-0000-0000-000000000000';
+const DIAG = process.env.AI_DIAG === '1';
 
 function isValidConnectionString(connectionString: unknown): connectionString is string {
   return typeof connectionString === 'string' &&
@@ -11,19 +12,17 @@ function isValidConnectionString(connectionString: unknown): connectionString is
     connectionString !== EMPTY_CONNECTION_STRING;
 }
 
-function fineGrainedSampling(envelope: any): boolean {
-  const baseType = envelope && envelope.data && envelope.data.baseType;
-  const name = envelope && envelope.data && envelope.data.baseData && envelope.data.baseData.name;
-
-  if (
-    ['RequestData', 'RemoteDependencyData'].includes(baseType) &&
-    typeof name === 'string' &&
-    name.includes('/health')
-  ) {
-    envelope.sampleRate = 1;
-  }
-
-  return true;
+function logConnectionStringDetails(connectionString: string): void {
+  const parts = connectionString.split(';').reduce<Record<string, string>>((acc, part) => {
+    const [key, ...rest] = part.split('=');
+    acc[key] = rest.join('=');
+    return acc;
+  }, {});
+  logger.info('[ai-diag] InstrumentationKey=%s...', (parts['InstrumentationKey'] || '').slice(0, 8));
+  logger.info('[ai-diag] IngestionEndpoint=%s',
+    parts['IngestionEndpoint'] || 'none (default https://dc.services.visualstudio.com)');
+  logger.info('[ai-diag] LiveEndpoint=%s',
+    parts['LiveEndpoint'] || 'none (default https://rt.services.visualstudio.com)');
 }
 
 function enableAppInsights(): void {
@@ -33,6 +32,12 @@ function enableAppInsights(): void {
     if (!isValidConnectionString(connectionString)) {
       logger.info('Application Insights connection string not configured; continuing without telemetry');
       return;
+    }
+
+    if (DIAG) {
+      logConnectionStringDetails(connectionString);
+      const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+      diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
     }
 
     // App Insights 3.x uses OpenTelemetry resource/service.name for cloud role mapping.
@@ -54,11 +59,11 @@ function enableAppInsights(): void {
       appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = CLOUD_ROLE_NAME;
     }
 
-    if (appInsights.defaultClient && appInsights.defaultClient.addTelemetryProcessor) {
-      appInsights.defaultClient.addTelemetryProcessor(fineGrainedSampling);
-    }
-
     appInsights.start();
+
+    if (DIAG && appInsights.defaultClient && appInsights.defaultClient.trackTrace) {
+      appInsights.defaultClient.trackTrace({ message: 'ai-startup-canary' });
+    }
 
     logger.info('Application Insights enabled');
   } catch (error) {

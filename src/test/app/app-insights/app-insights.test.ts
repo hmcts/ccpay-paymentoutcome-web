@@ -4,7 +4,6 @@ type AppInsightsMock = {
   setAutoCollectConsole: jest.Mock;
   setSendLiveMetrics: jest.Mock;
   start: jest.Mock;
-  addTelemetryProcessor: jest.Mock;
   tags: Record<string, string>;
 };
 
@@ -16,7 +15,6 @@ const createMocks = (): AppInsightsMock => {
   const setAutoCollectConsole = jest.fn().mockReturnValue({ setSendLiveMetrics });
   const setAutoDependencyCorrelation = jest.fn().mockReturnValue({ setAutoCollectConsole });
   const setup = jest.fn().mockReturnValue({ setAutoDependencyCorrelation });
-  const addTelemetryProcessor = jest.fn();
   const tags: Record<string, string> = {};
 
   return {
@@ -25,7 +23,6 @@ const createMocks = (): AppInsightsMock => {
     setAutoCollectConsole,
     setSendLiveMetrics,
     start,
-    addTelemetryProcessor,
     tags
   };
 };
@@ -34,14 +31,11 @@ const mockConfig = (value: unknown) => ({
   get: jest.fn().mockReturnValue(value)
 });
 
-const loadAppInsights = (addTelemetryProcessorMock?: jest.Mock) => {
+const loadAppInsights = () => {
   jest.isolateModules(() => {
     const enableAppInsights = require('../../../main/app-insights/app-insights');
     enableAppInsights();
   });
-  return addTelemetryProcessorMock && addTelemetryProcessorMock.mock.calls[0]
-    ? addTelemetryProcessorMock.mock.calls[0][0]
-    : undefined;
 };
 
 describe('app insights bootstrap', () => {
@@ -65,8 +59,7 @@ describe('app insights bootstrap', () => {
         context: {
           tags: mocks.tags,
           keys: { cloudRole: 'cloudRole' }
-        },
-        addTelemetryProcessor: mocks.addTelemetryProcessor
+        }
       }
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
@@ -92,8 +85,7 @@ describe('app insights bootstrap', () => {
         context: {
           tags: mocks.tags,
           keys: { cloudRole: 'cloudRole' }
-        },
-        addTelemetryProcessor: mocks.addTelemetryProcessor
+        }
       }
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
@@ -110,7 +102,6 @@ describe('app insights bootstrap', () => {
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
     expect(mocks.tags.cloudRole).toBe('ccpay-paymentoutcome-web');
-    expect(mocks.addTelemetryProcessor).toHaveBeenCalled();
     expect(process.env.OTEL_SERVICE_NAME).toBe('ccpay-paymentoutcome-web');
   });
 
@@ -133,110 +124,5 @@ describe('app insights bootstrap', () => {
     loadAppInsights();
 
     expect(warnMock).toHaveBeenCalled();
-  });
-});
-
-describe('fineGrainedSampling telemetry processor', () => {
-  let processor: (envelope: any) => boolean;
-
-  beforeEach(() => {
-    const addTelemetryProcessor = jest.fn();
-    jest.doMock('config', () => mockConfig(connectionString));
-    jest.doMock('applicationinsights', () => ({
-      setup: jest.fn().mockReturnValue({
-        setAutoDependencyCorrelation: jest.fn().mockReturnValue({
-          setAutoCollectConsole: jest.fn().mockReturnValue({
-            setSendLiveMetrics: jest.fn().mockReturnValue({ start: jest.fn() })
-          })
-        })
-      }),
-      start: jest.fn(),
-      defaultClient: {
-        context: {
-          tags: {},
-          keys: { cloudRole: 'cloudRole' }
-        },
-        addTelemetryProcessor
-      }
-    }));
-    jest.doMock('@hmcts/nodejs-logging', () => ({
-      Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
-      }
-    }));
-
-    processor = loadAppInsights(addTelemetryProcessor) as (envelope: any) => boolean;
-  });
-
-  afterEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
-  });
-
-  it.each([
-    ['GET /health', 'RequestData'],
-    ['GET /health/liveness', 'RequestData'],
-    ['GET /health/readiness', 'RequestData'],
-    ['dependency to /health', 'RemoteDependencyData']
-  ])('keeps health telemetry at 100%% sampling for %s (%s)', (_name, baseType) => {
-    const envelope: any = {
-      data: {
-        baseType,
-        baseData: { name: 'GET /health' }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect(envelope.sampleRate).toBe(1);
-  });
-
-  it('does not set sampleRate for non-health request telemetry', () => {
-    const envelope: any = {
-      data: {
-        baseType: 'RequestData',
-        baseData: { name: 'GET /payment/123/confirmation' }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect(envelope.sampleRate).toBeUndefined();
-  });
-
-  it('does not set sampleRate for non-request/dependency telemetry', () => {
-    const envelope: any = {
-      data: {
-        baseType: 'EventData',
-        baseData: { name: 'some event' }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect(envelope.sampleRate).toBeUndefined();
-  });
-
-  it('does not set sampleRate when name is not a string', () => {
-    const envelope: any = {
-      data: {
-        baseType: 'RequestData',
-        baseData: { name: undefined }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect((envelope as any).sampleRate).toBeUndefined();
-  });
-
-  it('returns true and does not throw when envelope is missing data', () => {
-    const result = processor({});
-
-    expect(result).toBe(true);
   });
 });
