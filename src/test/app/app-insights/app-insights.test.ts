@@ -186,11 +186,9 @@ describe('app insights diagnostics (AI_DIAG=1)', () => {
     expect(trackTrace).toHaveBeenCalledWith({ message: 'ai-startup-canary' });
   });
 
-  it('logs default endpoint fallbacks when the connection string has no endpoints', () => {
+  it('logs default endpoint fallbacks when the connection string has no endpoints, without AI_DIAG set', () => {
     const logger = { info: jest.fn(), warn: jest.fn() };
-    mockOtelDiagApi();
 
-    process.env.AI_DIAG = '1';
     jest.doMock('config', () => mockConfig('InstrumentationKey=test-key'));
     jest.doMock('applicationinsights', () => appInsightsModuleMock());
     jest.doMock('@hmcts/nodejs-logging', () => ({

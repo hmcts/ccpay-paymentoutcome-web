@@ -34,8 +34,9 @@ function enableAppInsights(): void {
       return;
     }
 
+    logConnectionStringDetails(connectionString);
+
     if (DIAG) {
-      logConnectionStringDetails(connectionString);
       const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
       diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
     }
