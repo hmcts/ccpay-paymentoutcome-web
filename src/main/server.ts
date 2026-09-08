@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+
+// Polyfill for @typespec/ts-http-runtime global crypto requirement
+if (typeof globalThis !== 'undefined' && !globalThis.crypto) {
+  globalThis.crypto = require('node:crypto').webcrypto || require('node:crypto');
+}
+
 const env = process.env.NODE_ENV || 'development';
 const { PropertiesVolume } = require('./modules/properties-volume');
 new PropertiesVolume().enableForEnv(env);
@@ -13,7 +19,6 @@ const logger = Logger.getLogger('server');
 
 // TODO: set the right port for your application
 const port: number = parseInt(process.env.PORT, 10) || 3100;
-
 
 app.listen(port, () => {
   logger.info(`Application started: http://localhost:${port}`);
