@@ -27,6 +27,7 @@
     "@hmcts/nodejs-healthcheck": "^1.8.0",
     "@hmcts/nodejs-logging": "^4.0.4",
     "@hmcts/properties-volume": "^0.0.14",
+    "@opentelemetry/api": "^1.9.1",
     "@snyk/protect": "^1.1081.0",
     "@types/config": "^0.0.41",
     "@types/cookie-parser": "^1.4.2",

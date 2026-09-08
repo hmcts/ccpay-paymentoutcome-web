@@ -4,7 +4,6 @@ const { Logger } = require('@hmcts/nodejs-logging');
 const logger = Logger.getLogger('app-insights');
 const CLOUD_ROLE_NAME = 'ccpay-paymentoutcome-web';
 const EMPTY_CONNECTION_STRING = 'InstrumentationKey=00000000-0000-0000-0000-000000000000';
-const DIAG = process.env.AI_DIAG === '1';
 
 function isValidConnectionString(connectionString: unknown): connectionString is string {
   return typeof connectionString === 'string' &&
@@ -36,10 +35,8 @@ function enableAppInsights(): void {
 
     logConnectionStringDetails(connectionString);
 
-    if (DIAG) {
-      const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
-      diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
-    }
+    const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
     // App Insights 3.x uses OpenTelemetry resource/service.name for cloud role mapping.
     process.env.OTEL_SERVICE_NAME = CLOUD_ROLE_NAME;
@@ -62,7 +59,7 @@ function enableAppInsights(): void {
 
     appInsights.start();
 
-    if (DIAG && appInsights.defaultClient && appInsights.defaultClient.trackTrace) {
+    if (appInsights.defaultClient && appInsights.defaultClient.trackTrace) {
       appInsights.defaultClient.trackTrace({ message: 'ai-startup-canary' });
     }
 

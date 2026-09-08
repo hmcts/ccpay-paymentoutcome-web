@@ -103,6 +103,7 @@ describe('app insights bootstrap', () => {
 
   it('starts application insights and sets cloud role when a valid connection string exists', () => {
     const mocks = createMocks();
+    mockOtelDiagApi();
 
     jest.doMock('config', () => mockConfig(connectionString));
     jest.doMock('applicationinsights', () => ({
@@ -154,9 +155,8 @@ describe('app insights bootstrap', () => {
   });
 });
 
-describe('app insights diagnostics (AI_DIAG=1)', () => {
+describe('app insights startup diagnostics', () => {
   afterEach(() => {
-    delete process.env.AI_DIAG;
     jest.resetModules();
     jest.clearAllMocks();
   });
@@ -166,7 +166,6 @@ describe('app insights diagnostics (AI_DIAG=1)', () => {
     const trackTrace = jest.fn();
     const diagSetLogger = mockOtelDiagApi();
 
-    process.env.AI_DIAG = '1';
     jest.doMock('config', () => mockConfig(
       'InstrumentationKey=test-key;IngestionEndpoint=https://ingest.test/;LiveEndpoint=https://live.test/'));
     jest.doMock('applicationinsights', () => appInsightsModuleMock({
@@ -186,8 +185,9 @@ describe('app insights diagnostics (AI_DIAG=1)', () => {
     expect(trackTrace).toHaveBeenCalledWith({ message: 'ai-startup-canary' });
   });
 
-  it('logs default endpoint fallbacks when the connection string has no endpoints, without AI_DIAG set', () => {
+  it('logs default endpoint fallbacks when the connection string has no endpoints', () => {
     const logger = { info: jest.fn(), warn: jest.fn() };
+    mockOtelDiagApi();
 
     jest.doMock('config', () => mockConfig('InstrumentationKey=test-key'));
     jest.doMock('applicationinsights', () => appInsightsModuleMock());
@@ -214,7 +214,6 @@ describe('app insights diagnostics (AI_DIAG=1)', () => {
     const logger = { info: jest.fn(), warn: jest.fn() };
     mockOtelDiagApi();
 
-    process.env.AI_DIAG = '1';
     jest.doMock('config', () => mockConfig(connectionString));
     jest.doMock('applicationinsights', () => appInsightsModuleMock(appDefaultClient));
     jest.doMock('@hmcts/nodejs-logging', () => ({
