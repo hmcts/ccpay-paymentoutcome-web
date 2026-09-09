@@ -3,8 +3,8 @@ type AppInsightsMock = {
   setAutoDependencyCorrelation: jest.Mock;
   setAutoCollectConsole: jest.Mock;
   setSendLiveMetrics: jest.Mock;
+  setAzureMonitorOptions: jest.Mock;
   start: jest.Mock;
-  addTelemetryProcessor: jest.Mock;
   tags: Record<string, string>;
 };
 
@@ -12,11 +12,11 @@ const connectionString = 'InstrumentationKey=test-key;IngestionEndpoint=https://
 
 const createMocks = (): AppInsightsMock => {
   const start = jest.fn();
-  const setSendLiveMetrics = jest.fn().mockReturnValue({ start });
+  const setAzureMonitorOptions = jest.fn().mockReturnValue({ start });
+  const setSendLiveMetrics = jest.fn().mockReturnValue({ setAzureMonitorOptions });
   const setAutoCollectConsole = jest.fn().mockReturnValue({ setSendLiveMetrics });
   const setAutoDependencyCorrelation = jest.fn().mockReturnValue({ setAutoCollectConsole });
   const setup = jest.fn().mockReturnValue({ setAutoDependencyCorrelation });
-  const addTelemetryProcessor = jest.fn();
   const tags: Record<string, string> = {};
 
   return {
@@ -24,8 +24,8 @@ const createMocks = (): AppInsightsMock => {
     setAutoDependencyCorrelation,
     setAutoCollectConsole,
     setSendLiveMetrics,
+    setAzureMonitorOptions,
     start,
-    addTelemetryProcessor,
     tags
   };
 };
@@ -34,20 +34,19 @@ const mockConfig = (value: unknown) => ({
   get: jest.fn().mockReturnValue(value)
 });
 
-const loadAppInsights = (addTelemetryProcessorMock?: jest.Mock) => {
+const loadAppInsights = () => {
   jest.isolateModules(() => {
     const enableAppInsights = require('../../../main/app-insights/app-insights');
     enableAppInsights();
   });
-  return addTelemetryProcessorMock && addTelemetryProcessorMock.mock.calls[0]
-    ? addTelemetryProcessorMock.mock.calls[0][0]
-    : undefined;
 };
 
 describe('app insights bootstrap', () => {
   afterEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
+    delete process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
+    delete process.env.OTEL_SERVICE_NAME;
   });
 
   it.each([
@@ -60,14 +59,7 @@ describe('app insights bootstrap', () => {
 
     jest.doMock('config', () => mockConfig(value));
     jest.doMock('applicationinsights', () => ({
-      setup: mocks.setup,
-      defaultClient: {
-        context: {
-          tags: mocks.tags,
-          keys: { cloudRole: 'cloudRole' }
-        },
-        addTelemetryProcessor: mocks.addTelemetryProcessor
-      }
+      setup: mocks.setup
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
@@ -81,20 +73,13 @@ describe('app insights bootstrap', () => {
     expect(mocks.start).not.toHaveBeenCalled();
   });
 
-  it('starts application insights and sets cloud role when a valid connection string exists', () => {
+  it('starts application insights and sets env bindings when a valid connection string exists', () => {
     const mocks = createMocks();
 
     jest.doMock('config', () => mockConfig(connectionString));
     jest.doMock('applicationinsights', () => ({
       setup: mocks.setup,
-      start: mocks.start,
-      defaultClient: {
-        context: {
-          tags: mocks.tags,
-          keys: { cloudRole: 'cloudRole' }
-        },
-        addTelemetryProcessor: mocks.addTelemetryProcessor
-      }
+      start: mocks.start
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
@@ -104,14 +89,119 @@ describe('app insights bootstrap', () => {
 
     loadAppInsights();
 
-    expect(mocks.setup).toHaveBeenCalledWith(connectionString);
+    expect(mocks.setup).toHaveBeenCalledWith();
     expect(mocks.setAutoDependencyCorrelation).toHaveBeenCalledWith(true);
     expect(mocks.setAutoCollectConsole).toHaveBeenCalledWith(true, true);
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
-    expect(mocks.tags.cloudRole).toBe('ccpay-paymentoutcome-web');
-    expect(mocks.addTelemetryProcessor).toHaveBeenCalled();
     expect(process.env.OTEL_SERVICE_NAME).toBe('ccpay-paymentoutcome-web');
+    expect(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING).toBe(connectionString);
+  });
+
+  it('configures always-on sampling and health request suppression', () => {
+    const mocks = createMocks();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    expect(mocks.setAzureMonitorOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        samplingRatio: 1,
+        tracesPerSecond: 0,
+        instrumentationOptions: expect.objectContaining({
+          http: expect.objectContaining({
+            enabled: true,
+            ignoreIncomingRequestHook: expect.any(Function)
+          })
+        })
+      })
+    );
+  });
+
+  it('returns early for non-health requests in the ignore hook', () => {
+    const mocks = createMocks();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    const options = mocks.setAzureMonitorOptions.mock.calls[0][0];
+    const hook = options.instrumentationOptions.http.ignoreIncomingRequestHook;
+
+    expect(hook({ url: '/login' })).toBe(false);
+  });
+
+  it.each([
+    ['/health', true],
+    ['/health/liveness', true],
+    ['/health/readiness', true]
+  ])('suppresses health request spans in the ignore hook (%s)', (path, shouldIgnore) => {
+    const mocks = createMocks();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('node:crypto', () => ({
+      randomInt: jest.fn().mockReturnValue(1)
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    const options = mocks.setAzureMonitorOptions.mock.calls[0][0];
+    const hook = options.instrumentationOptions.http.ignoreIncomingRequestHook;
+
+    expect(hook({ url: path })).toBe(shouldIgnore);
+  });
+
+  it('keeps 1 in 100 health request spans', () => {
+    const mocks = createMocks();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('node:crypto', () => ({
+      randomInt: jest.fn().mockReturnValue(0)
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    const options = mocks.setAzureMonitorOptions.mock.calls[0][0];
+    const hook = options.instrumentationOptions.http.ignoreIncomingRequestHook;
+
+    expect(hook({ url: '/health' })).toBe(false);
   });
 
   it('logs a warning and continues if setup throws', () => {
@@ -134,14 +224,9 @@ describe('app insights bootstrap', () => {
 
     expect(warnMock).toHaveBeenCalled();
   });
-});
 
-describe('fineGrainedSampling telemetry processor', () => {
-  let processor: (envelope: any) => boolean;
-
-  beforeEach(() => {
-    const addTelemetryProcessor = jest.fn();
-    jest.doMock('config', () => mockConfig(connectionString));
+  it('exposes the raw connection string via environment variable', () => {
+    jest.doMock('config', () => mockConfig('InstrumentationKey=test-key'));
     jest.doMock('applicationinsights', () => ({
       setup: jest.fn().mockReturnValue({
         setAutoDependencyCorrelation: jest.fn().mockReturnValue({
@@ -149,94 +234,14 @@ describe('fineGrainedSampling telemetry processor', () => {
             setSendLiveMetrics: jest.fn().mockReturnValue({ start: jest.fn() })
           })
         })
-      }),
-      start: jest.fn(),
-      defaultClient: {
-        context: {
-          tags: {},
-          keys: { cloudRole: 'cloudRole' }
-        },
-        addTelemetryProcessor
-      }
+      })
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
-      Logger: {
-        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
-      }
+      Logger: { getLogger: () => ({ info: jest.fn(), warn: jest.fn() }) }
     }));
 
-    processor = loadAppInsights(addTelemetryProcessor) as (envelope: any) => boolean;
-  });
+    loadAppInsights();
 
-  afterEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
-  });
-
-  it.each([
-    ['GET /health', 'RequestData'],
-    ['GET /health/liveness', 'RequestData'],
-    ['GET /health/readiness', 'RequestData'],
-    ['dependency to /health', 'RemoteDependencyData']
-  ])('keeps health telemetry at 100%% sampling for %s (%s)', (_name, baseType) => {
-    const envelope: any = {
-      data: {
-        baseType,
-        baseData: { name: 'GET /health' }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect(envelope.sampleRate).toBe(1);
-  });
-
-  it('does not set sampleRate for non-health request telemetry', () => {
-    const envelope: any = {
-      data: {
-        baseType: 'RequestData',
-        baseData: { name: 'GET /payment/123/confirmation' }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect(envelope.sampleRate).toBeUndefined();
-  });
-
-  it('does not set sampleRate for non-request/dependency telemetry', () => {
-    const envelope: any = {
-      data: {
-        baseType: 'EventData',
-        baseData: { name: 'some event' }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect(envelope.sampleRate).toBeUndefined();
-  });
-
-  it('does not set sampleRate when name is not a string', () => {
-    const envelope: any = {
-      data: {
-        baseType: 'RequestData',
-        baseData: { name: undefined }
-      }
-    };
-
-    const result = processor(envelope);
-
-    expect(result).toBe(true);
-    expect((envelope as any).sampleRate).toBeUndefined();
-  });
-
-  it('returns true and does not throw when envelope is missing data', () => {
-    const result = processor({});
-
-    expect(result).toBe(true);
+    expect(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING).toBe('InstrumentationKey=test-key');
   });
 });
