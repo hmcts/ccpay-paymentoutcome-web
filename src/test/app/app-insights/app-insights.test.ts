@@ -154,13 +154,16 @@ describe('app insights bootstrap', () => {
     ['/health', true],
     ['/health/liveness', true],
     ['/health/readiness', true]
-  ])('applies 1%% sampling to %s in the ignore hook', (path, shouldSample) => {
+  ])('suppresses health request spans in the ignore hook (%s)', (path, shouldIgnore) => {
     const mocks = createMocks();
 
     jest.doMock('config', () => mockConfig(connectionString));
     jest.doMock('applicationinsights', () => ({
       setup: mocks.setup,
       start: mocks.start
+    }));
+    jest.doMock('node:crypto', () => ({
+      randomInt: jest.fn().mockReturnValue(1)
     }));
     jest.doMock('@hmcts/nodejs-logging', () => ({
       Logger: {
@@ -173,12 +176,32 @@ describe('app insights bootstrap', () => {
     const options = mocks.setAzureMonitorOptions.mock.calls[0][0];
     const hook = options.instrumentationOptions.http.ignoreIncomingRequestHook;
 
-    const randomSpy = jest.spyOn(Math, 'random');
-    randomSpy.mockReturnValue(0.5);
+    expect(hook({ url: path })).toBe(shouldIgnore);
+  });
 
-    expect(hook({ url: path })).toBe(shouldSample);
+  it('keeps 1 in 100 health request spans', () => {
+    const mocks = createMocks();
 
-    randomSpy.mockRestore();
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('node:crypto', () => ({
+      randomInt: jest.fn().mockReturnValue(0)
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    const options = mocks.setAzureMonitorOptions.mock.calls[0][0];
+    const hook = options.instrumentationOptions.http.ignoreIncomingRequestHook;
+
+    expect(hook({ url: '/health' })).toBe(false);
   });
 
   it('logs a warning and continues if setup throws', () => {

@@ -1,10 +1,11 @@
+const nodeCrypto = require('node:crypto');
 const config = require('config');
 const { Logger } = require('@hmcts/nodejs-logging');
 
 const logger = Logger.getLogger('app-insights');
 const CLOUD_ROLE_NAME = 'ccpay-paymentoutcome-web';
 const EMPTY_CONNECTION_STRING = 'InstrumentationKey=00000000-0000-0000-0000-000000000000';
-const HEALTH_REQUEST_SAMPLE_RATE = 0.01;
+const HEALTH_REQUEST_SAMPLE_SPACE = 100;
 
 function isValidConnectionString(connectionString: unknown): connectionString is string {
   return typeof connectionString === 'string' &&
@@ -18,7 +19,10 @@ function isHealthRequest(request: { url?: string }): boolean {
 }
 
 function sampleHealthRequest(request: { url?: string }): boolean {
-  return isHealthRequest(request) && Math.random() >= HEALTH_REQUEST_SAMPLE_RATE;
+  if (!isHealthRequest(request)) {
+    return false;
+  }
+  return nodeCrypto.randomInt(HEALTH_REQUEST_SAMPLE_SPACE) !== 0;
 }
 
 function enableAppInsights(): void {
