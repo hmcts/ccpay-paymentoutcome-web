@@ -3,6 +3,7 @@ type AppInsightsMock = {
   setAutoDependencyCorrelation: jest.Mock;
   setAutoCollectConsole: jest.Mock;
   setSendLiveMetrics: jest.Mock;
+  setAzureMonitorOptions: jest.Mock;
   start: jest.Mock;
   tags: Record<string, string>;
 };
@@ -11,7 +12,8 @@ const connectionString = 'InstrumentationKey=test-key;IngestionEndpoint=https://
 
 const createMocks = (): AppInsightsMock => {
   const start = jest.fn();
-  const setSendLiveMetrics = jest.fn().mockReturnValue({ start });
+  const setAzureMonitorOptions = jest.fn().mockReturnValue({ start });
+  const setSendLiveMetrics = jest.fn().mockReturnValue({ setAzureMonitorOptions });
   const setAutoCollectConsole = jest.fn().mockReturnValue({ setSendLiveMetrics });
   const setAutoDependencyCorrelation = jest.fn().mockReturnValue({ setAutoCollectConsole });
   const setup = jest.fn().mockReturnValue({ setAutoDependencyCorrelation });
@@ -22,6 +24,7 @@ const createMocks = (): AppInsightsMock => {
     setAutoDependencyCorrelation,
     setAutoCollectConsole,
     setSendLiveMetrics,
+    setAzureMonitorOptions,
     start,
     tags
   };
@@ -93,6 +96,89 @@ describe('app insights bootstrap', () => {
     expect(mocks.start).toHaveBeenCalled();
     expect(process.env.OTEL_SERVICE_NAME).toBe('ccpay-paymentoutcome-web');
     expect(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING).toBe(connectionString);
+  });
+
+  it('configures always-on sampling and health request suppression', () => {
+    const mocks = createMocks();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    expect(mocks.setAzureMonitorOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        samplingRatio: 1,
+        tracesPerSecond: 0,
+        instrumentationOptions: expect.objectContaining({
+          http: expect.objectContaining({
+            enabled: true,
+            ignoreIncomingRequestHook: expect.any(Function)
+          })
+        })
+      })
+    );
+  });
+
+  it('returns early for non-health requests in the ignore hook', () => {
+    const mocks = createMocks();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    const options = mocks.setAzureMonitorOptions.mock.calls[0][0];
+    const hook = options.instrumentationOptions.http.ignoreIncomingRequestHook;
+
+    expect(hook({ url: '/login' })).toBe(false);
+  });
+
+  it.each([
+    ['/health', true],
+    ['/health/liveness', true],
+    ['/health/readiness', true]
+  ])('applies 1%% sampling to %s in the ignore hook', (path, shouldSample) => {
+    const mocks = createMocks();
+
+    jest.doMock('config', () => mockConfig(connectionString));
+    jest.doMock('applicationinsights', () => ({
+      setup: mocks.setup,
+      start: mocks.start
+    }));
+    jest.doMock('@hmcts/nodejs-logging', () => ({
+      Logger: {
+        getLogger: () => ({ info: jest.fn(), warn: jest.fn() })
+      }
+    }));
+
+    loadAppInsights();
+
+    const options = mocks.setAzureMonitorOptions.mock.calls[0][0];
+    const hook = options.instrumentationOptions.http.ignoreIncomingRequestHook;
+
+    const randomSpy = jest.spyOn(Math, 'random');
+    randomSpy.mockReturnValue(0.5);
+
+    expect(hook({ url: path })).toBe(shouldSample);
+
+    randomSpy.mockRestore();
   });
 
   it('logs a warning and continues if setup throws', () => {
