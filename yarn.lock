@@ -3211,11 +3211,11 @@ __metadata:
   linkType: hard
 
 "@snyk/protect@npm:^1.1081.0":
-  version: 1.1264.0
-  resolution: "@snyk/protect@npm:1.1264.0"
+  version: 1.1308.0
+  resolution: "@snyk/protect@npm:1.1308.0"
   bin:
     snyk-protect: bin/snyk-protect
-  checksum: bc03e2f28eac02c2bd455d721731d6fd0dbfdd515588f19540772fc8f1bdd611bc5eef7c05bcd0a3190357babd70fe50f881b6f4b06d5fd0799468d12de12152
+  checksum: 7168a5f125ddf5418bf7328294ac7d998f243ada2651e20a14e84196f7e8a041efe1e833e493e930fb448cad3768c78aab550d1fe0266af322ac58f59cb594b6
   languageName: node
   linkType: hard
 
