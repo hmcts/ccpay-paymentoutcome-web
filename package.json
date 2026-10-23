@@ -133,7 +133,7 @@
     "ajv": "6.12.6",
     "http-cache-semantics": "4.3.0",
     "socks": "^2.8.3",
-    "body-parser": "^1.20.3",
+    "body-parser": "^1.20.9",
     "serve-static": "^1.16.2",
     "path-to-regexp": "~1.9.0",
     "cross-spawn": "7.0.6",
