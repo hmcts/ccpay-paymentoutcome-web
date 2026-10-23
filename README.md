@@ -32,7 +32,7 @@ Located in `./bin/init.sh`. Simply run and follow the explanation how to execute
 
 Running the application requires the following tools to be installed in your environment:
 
-  * [Node.js](https://nodejs.org/) 22.x (use `nvm install && nvm use` to select the version in `.nvmrc`)
+  * [Node.js](https://nodejs.org/) 22.23.4 (use `nvm install && nvm use` to select the version in `.nvmrc`)
   * [yarn](https://yarnpkg.com/)
   * [Docker](https://www.docker.com)
 
