@@ -32,16 +32,17 @@ Located in `./bin/init.sh`. Simply run and follow the explanation how to execute
 
 Running the application requires the following tools to be installed in your environment:
 
-  * [Node.js](https://nodejs.org/) v12.0.0 or later
+  * [Node.js](https://nodejs.org/) 22.23.4 (use `nvm install && nvm use` to select the version in `.nvmrc`)
   * [yarn](https://yarnpkg.com/)
   * [Docker](https://www.docker.com)
 
 ### Running the application
 
-Install dependencies by executing the following command:
+Enable Corepack to use the Yarn version pinned in `package.json`, then install dependencies:
 
  ```bash
-$ yarn install
+$ corepack enable
+$ yarn install --immutable
  ```
 Bundle:
 

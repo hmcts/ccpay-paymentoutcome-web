@@ -1,4 +1,3 @@
-# This workflow will have a CI flow for fees-register-admin-web(angular) project
 name: ccpay-paymentoutcome-web - CI
 on:
   push:
@@ -17,17 +16,23 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: use node.js 18
+      - name: Use Node.js from .nvmrc
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version-file: '.nvmrc'
           registry-url: https://registry.npmjs.org/
+      - name: Enable Corepack
+        run: corepack enable
       - name: Yarn install
         run: yarn install --immutable
       - name: Install codecov globally
         run: npm install -g codecov
       - name: yarn version
         run: yarn --version
+      - name: Production build
+        run: yarn build:prod
+      - name: Type check
+        run: yarn tsc --noEmit
       - name: Yarn lint
         run: yarn lint
       - name: Yarn Test
