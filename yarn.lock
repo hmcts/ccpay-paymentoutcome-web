@@ -1680,12 +1680,13 @@ __metadata:
   linkType: hard
 
 "@hmcts/info-provider@npm:^1.2.1":
-  version: 1.2.3
-  resolution: "@hmcts/info-provider@npm:1.2.3"
+  version: 1.4.0
+  resolution: "@hmcts/info-provider@npm:1.4.0"
   dependencies:
-    express: "npm:^4.21.2"
-    js-yaml: "npm:^4.1.0"
-  checksum: 10/cc712b89bb7021e2d30e885dd303609b74bcf5f98463651b9078d634e3ca5a0bf94fbf913eab7f9a8002b919e22a989c80dbd542a3d4578d3b154b4b2fc0ba07
+    js-yaml: "npm:^4.1.1"
+  peerDependencies:
+    express: ">=4"
+  checksum: 10/c73658a9b384488a3495d33b504ee90fd12206e39d60b11d66c1b0fc5ac5a70b49a1272709799cb3b3afcaebf41306461a0c032c90141bca4c354a288112af9e
   languageName: node
   linkType: hard
 
@@ -7493,7 +7494,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.21.0, express@npm:^4.21.2":
+"express@npm:^4.21.0":
   version: 4.21.2
   resolution: "express@npm:4.21.2"
   dependencies:
@@ -9716,6 +9717,17 @@ __metadata:
   bin:
     js-yaml: bin/js-yaml.js
   checksum: 10/c138a34a3fd0d08ebaf71273ad4465569a483b8a639e0b118ff65698d257c2791d3199e3f303631f2cb98213fa7b5f5d6a4621fd0fff819421b990d30d967140
+  languageName: node
+  linkType: hard
+
+"js-yaml@npm:^4.1.1":
+  version: 4.3.2
+  resolution: "js-yaml@npm:4.3.2"
+  dependencies:
+    argparse: "npm:^2.0.1"
+  bin:
+    js-yaml: bin/js-yaml.js
+  checksum: 10/05c44b9c73e4901d92703b155e76518df64bf01ac62e4c036b47de4b391e19b72e32656e8954d51b436307f08cc9d0c0d4ec617d061cf2f65fffee9f3114bee7
   languageName: node
   linkType: hard
 
