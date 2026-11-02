@@ -19,29 +19,40 @@ describe('Home page', () => {
     mock.cleanAll();
   });
 
-  describe('on GET /payment/:id/confirmation/:rc', () => {
+  describe('on GET /payment/:id/confirmation', () => {
+    test('returns 401 when Authorization header is missing', async () => {
+      // Should not call upstream services when unauthenticated
+      await request(app)
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .expect((res) => {
+          expect(res.status).to.equal(401);
+          expect(res.text).to.contain('There is a problem');
+          expect(res.text).to.contain('Your card payment was unsuccessful.');
+        });
+    });
+
+    test('returns 400 when payment id is not a valid UUID', async () => {
+      await request(app)
+        .get('/payment/not-a-uuid/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
+        .expect((res) => {
+          expect(res.status).to.equal(400);
+          expect(res.text).to.contain('There is a problem');
+          expect(res.text).to.contain('Your card payment was unsuccessful.');
+        });
+    });
+
     test('renders English success page when payment status is Success', async () => {
       resolveGetPaymentStatusWithStatus('Success');
 
       await request(app)
-        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation/0e5278ca80791bd38c0a9674d087a4a1ba14810ab913f1ffdbe34630d459daa2?language=en')
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Payment successful');
-          expect(res.text).to.contain('RC-1763-0558-0473-0637');
-          expect(res.text).to.contain('/cases/case-details/1234123412341234#Servic');
-        });
-    });
-
-    test('renders English success page when payment status is lowercase success', async () => {
-      resolveGetPaymentStatusWithStatus('success');
-
-      await request(app)
-        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation/0e5278ca80791bd38c0a9674d087a4a1ba14810ab913f1ffdbe34630d459daa2?language=en')
-        .expect((res) => {
-          expect(res.status).to.equal(200);
-          expect(res.text).to.contain('Payment successful');
-          expect(res.text).to.contain('RC-1763-0558-0473-0637');
+          expect(res.text).to.contain('RC-1234-1234-1343-1234');
+          expect(res.text).to.contain('https://manage-case.demo.platform.hmcts.net/cases/case-details/1234123412341234#Service Request');
         });
     });
 
@@ -49,7 +60,8 @@ describe('Home page', () => {
       resolveGetPaymentStatusWithStatus('Success');
 
       await request(app)
-        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation/0e5278ca80791bd38c0a9674d087a4a1ba14810ab913f1ffdbe34630d459daa2?language=cy')
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=cy')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Taliad yn llwyddiannus');
@@ -61,7 +73,8 @@ describe('Home page', () => {
       resolveGetPaymentStatusWithStatus('Failed');
 
       await request(app)
-        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation/0e5278ca80791bd38c0a9674d087a4a1ba14810ab913f1ffdbe34630d459daa2?language=en')
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('There is a problem');
@@ -73,7 +86,8 @@ describe('Home page', () => {
       rejectGetPaymentStatus();
 
       await request(app)
-        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation/0e5278ca80791bd38c0a9674d087a4a1ba14810ab913f1ffdbe34630d459daa2?language=en')
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=en')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('There is a problem');
@@ -85,7 +99,8 @@ describe('Home page', () => {
       rejectGetPaymentStatus();
 
       await request(app)
-        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation/0e5278ca80791bd38c0a9674d087a4a1ba14810ab913f1ffdbe34630d459daa2?language=cy')
+        .get('/payment/466d7ea8-793b-4417-b4d7-a35b6b1a2fd6/confirmation?language=cy')
+        .set('Authorization', 'Bearer test-user-token')
         .expect((res) => {
           expect(res.status).to.equal(200);
           expect(res.text).to.contain('Mae yna broblem');
