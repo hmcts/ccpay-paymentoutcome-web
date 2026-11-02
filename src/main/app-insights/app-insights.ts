@@ -43,7 +43,7 @@ function enableAppInsights(): void {
 
     // 2. Initialize with clean environment bindings
     appInsights.setup()
-      .setAutoDependencyCorrelation(true)
+      .setAutoDependencyCorrelation(false)
       .setAutoCollectConsole(true, true)
       .setSendLiveMetrics(true)
       .setAzureMonitorOptions({
