@@ -90,7 +90,7 @@ describe('app insights bootstrap', () => {
     loadAppInsights();
 
     expect(mocks.setup).toHaveBeenCalledWith();
-    expect(mocks.setAutoDependencyCorrelation).toHaveBeenCalledWith(true);
+    expect(mocks.setAutoDependencyCorrelation).toHaveBeenCalledWith(false);
     expect(mocks.setAutoCollectConsole).toHaveBeenCalledWith(true, true);
     expect(mocks.setSendLiveMetrics).toHaveBeenCalledWith(true);
     expect(mocks.start).toHaveBeenCalled();
