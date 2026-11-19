@@ -33,7 +33,7 @@ function getSessionPaymentOutcomeSecret(): string {
 }
 export default function(app: Application): void {
 
-  app.get('/payment/:id/confirmation/:rc', (req, res) => {
+  app.get('/payment/:id/confirmation/:rc([a-fA-F0-9]{64})', (req, res) => {
     const uuid = req.params.id;
     const rc = req.params.rc;
     const language = getLanguage(req.url);
